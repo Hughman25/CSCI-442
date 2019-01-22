@@ -96,14 +96,28 @@ class IMP implements MouseListener{
      JMenu fun = new JMenu("Functions");
      
      JMenuItem firstItem = new JMenuItem("MyExample - fun1 method");
-    
+     JMenuItem secondItem = new JMenuItem("Rotate Image: 90 Degrees");
+     JMenuItem thirdItem = new JMenuItem("Gray Scale");
+     JMenuItem fourthItem = new JMenuItem("Blur Image");
+     JMenuItem fifthItem = new JMenuItem("Gray Scale With Mask");
+     JMenuItem sixthItem = new JMenuItem("Track Object");
+     
+     
      firstItem.addActionListener(new ActionListener(){
             @Override
           public void actionPerformed(ActionEvent evt){fun1();}
            });
-   
+     secondItem.addActionListener(new ActionListener(){
+         @Override
+       public void actionPerformed(ActionEvent evt){rotate90();}
+        });
        
       fun.add(firstItem);
+      fun.add(secondItem);
+      fun.add(thirdItem);
+      fun.add(fourthItem);
+      fun.add(fifthItem);
+      fun.add(sixthItem);
      
       return fun;   
 
@@ -264,7 +278,22 @@ class IMP implements MouseListener{
      resetPicture();
   }
   
-
+ private void rotate90() {
+	 for(int i=0; i<height; i++)
+	       for(int j=0; j<width; j++)
+	       {   
+	          int rgbArray[] = new int[4];
+	         
+	          //get three ints for R, G and B
+	          rgbArray = getPixelArray(picture[i][j]);
+	         
+	        
+	           rgbArray[1] = 0;
+	           //take three ints for R, G, B and put them back into a single int
+	           picture[i][j] = getPixels(rgbArray);
+	        } 
+	 resetPicture();
+ }
   
   
   private void quit()
