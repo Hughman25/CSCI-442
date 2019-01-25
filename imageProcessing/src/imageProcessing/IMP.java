@@ -291,22 +291,15 @@ class IMP implements MouseListener{
 			  int rgbArray[] = new int[4];
 			  //get three ints for R, G and B
 			  rgbArray = getPixelArray(picture[i][j]);
-			  placePixel(rgbArray, rotatedPicture);
+			  placePixel(j, i, rgbArray, rotatedPicture);
 		  } 
 	  }
 	  resetPicture(width, height, rotatedPicture);
   }
-  private void placePixel(int rgbArray[], int[][] rotatedPicture) {
-	  //change the width to the old height, and the height to the old width.
-	  int tempWidth = height;
-	  int tempHeight = width;
+  private void placePixel(int row, int col, int rgbArray[], int[][] rotatedPicture) {
 	  //create new picture with given dimensions.
 	  //change the orientation of the old picture to 90 degrees.
-	  for(int i = 0; i < tempHeight; i++) {
-		  for(int j = 0; j < tempWidth; j++){   
-			  rotatedPicture[i][j] = getPixels(rgbArray); 
-	      } 
-	  }
+		rotatedPicture[row][col] = getPixels(rgbArray); 
   }
   private void quit(){  
      System.exit(0);
