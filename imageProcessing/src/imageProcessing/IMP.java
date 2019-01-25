@@ -189,26 +189,30 @@ class IMP implements MouseListener{
    *  This method takes the picture back to the original picture
    */
   private void reset(){
-	   JLabel label = new JLabel(img);
-	   label.addMouseListener(this);
-       Image image = img.getImage();
-       PixelGrabber pg = new PixelGrabber(image, 0, 0, width, height, pixels, 0, width );
-       try{
-           pg.grabPixels();
-       }
-       catch(InterruptedException e){
-    	   		System.err.println("Interrupted waiting for pixels");
-            return;
-       }
-       for(int i = 0; i<width*height; i++) {
-          results[i] = pixels[i];  
-       }
-       turnTwoDimensional();
-       mp.removeAll();
-       mp.repaint();
-       mp.add(label);
-       mp.revalidate();
-
+	  if(img != null) {
+		   JLabel label = new JLabel(img);
+		   label.addMouseListener(this);
+	       Image image = img.getImage();
+	       PixelGrabber pg = new PixelGrabber(image, 0, 0, width, height, pixels, 0, width );
+	       try{
+	           pg.grabPixels();
+	       }
+	       catch(InterruptedException e){
+	    	   		System.err.println("Interrupted waiting for pixels");
+	            return;
+	       }
+	       for(int i = 0; i<width*height; i++) {
+	          results[i] = pixels[i];  
+	       }
+	       turnTwoDimensional();
+	       mp.removeAll();
+	       mp.repaint();
+	       mp.add(label);
+	       mp.revalidate();
+	  }
+	  else {
+		  JOptionPane.showMessageDialog(mp, "Error: No picture selected. Open an image and Try again.");
+	  }
     }
   /*
    * This method is called to redraw the screen with the new image. 
@@ -291,9 +295,12 @@ class IMP implements MouseListener{
 			  int rgbArray[] = new int[4];
 			  //get three ints for R, G and B
 			  rgbArray = getPixelArray(picture[i][j]);
-			  placePixel(j, i, rgbArray, rotatedPicture);
+			  placePixel(width-i-1, height-j-1, rgbArray, rotatedPicture);
 		  } 
 	  }
+	  //i=0,j=0: placePixel(width,height...)
+	  //i=0,j=1: placePixel(height,width-1...)
+	  //i=0,j=2: placePixel(height,width-2...)
 	  resetPicture(width, height, rotatedPicture);
   }
   private void placePixel(int row, int col, int rgbArray[], int[][] rotatedPicture) {
@@ -301,6 +308,8 @@ class IMP implements MouseListener{
 	  //change the orientation of the old picture to 90 degrees.
 		rotatedPicture[row][col] = getPixels(rgbArray); 
   }
+  
+  
   private void quit(){  
      System.exit(0);
   }
