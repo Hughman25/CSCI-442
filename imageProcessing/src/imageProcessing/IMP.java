@@ -41,7 +41,7 @@ class IMP implements MouseListener{
    IMP()
    {
       toolkit = Toolkit.getDefaultToolkit();
-      frame = new JFrame("Image Processing Software by Hunter");
+      frame = new JFrame("Image Processing Software by Hunter & Matthew");
       JMenuBar bar = new JMenuBar();
       JMenu file = new JMenu("File");
       JMenu functions = getFunctions();
@@ -189,25 +189,24 @@ class IMP implements MouseListener{
    *  This method takes the picture back to the original picture
    */
   private void reset(){
-	  
 	   JLabel label = new JLabel(img);
 	   label.addMouseListener(this);
        Image image = img.getImage();
-       
        PixelGrabber pg = new PixelGrabber(image, 0, 0, width, height, pixels, 0, width );
        try{
            pg.grabPixels();
-       }catch(InterruptedException e)
-         {
-            System.err.println("Interrupted waiting for pixels");
+       }
+       catch(InterruptedException e){
+    	   		System.err.println("Interrupted waiting for pixels");
             return;
-         }
-       for(int i = 0; i<width*height; i++)
+       }
+       for(int i = 0; i<width*height; i++) {
           results[i] = pixels[i];  
+       }
        turnTwoDimensional();
        mp.removeAll();
+       mp.repaint();
        mp.add(label);
-       
        mp.revalidate();
 
     }
@@ -216,34 +215,31 @@ class IMP implements MouseListener{
    */
   private void resetPicture(int height, int width, int[][] picture){
 	  for(int i = 0; i < height; i++) {
-	    	   	for(int j = 0; j < width; j++) {
-	          pixels[i*width+j] = picture[i][j];
-	  		}
-       }
-       Image img2 = toolkit.createImage(new MemoryImageSource(width, height, pixels, 0, width)); 
-
-       JLabel label2 = new JLabel(new ImageIcon(img2));    
-       mp.removeAll();
-       mp.add(label2);
-       mp.revalidate(); 
-   
-    }
-    /*
-     * This method takes a single integer value and breaks it down doing bit manipulation to 4 individual int values for A, R, G, and B values
-     */
-  private int [] getPixelArray(int pixel)
-  {
+		  for(int j = 0; j < width; j++) {
+			  pixels[i*width+j] = picture[i][j];
+		  }
+      }
+      Image img2 = toolkit.createImage(new MemoryImageSource(width, height, pixels, 0, width)); 
+      JLabel label2 = new JLabel(new ImageIcon(img2));    
+      mp.removeAll();
+      mp.repaint();
+      mp.add(label2);
+      mp.revalidate(); 
+  }
+  /*
+   * This method takes a single integer value and breaks it down doing bit manipulation to 4 individual int values for A, R, G, and B values
+   */
+  private int [] getPixelArray(int pixel){
       int temp[] = new int[4];
       temp[0] = (pixel >> 24) & 0xff;
       temp[1]   = (pixel >> 16) & 0xff;
       temp[2] = (pixel >>  8) & 0xff;
       temp[3]  = (pixel      ) & 0xff;
       return temp;
-      
-    }
-    /*
-     * This method takes an array of size 4 and combines the first 8 bits of each to create one integer. 
-     */
+   }
+   /*
+    * This method takes an array of size 4 and combines the first 8 bits of each to create one integer. 
+   */
   private int getPixels(int rgb[]){
          int alpha = 0;
          int rgba = (rgb[0] << 24) | (rgb[1] <<16) | (rgb[2] << 8) | rgb[3];
@@ -270,52 +266,49 @@ class IMP implements MouseListener{
     * integer value so you can give it back to the program and display the new picture. 
     */
   private void fun1(){
-     
-    for(int i=0; i<height; i++)
-       for(int j=0; j<width; j++)
-       {   
-          int rgbArray[] = new int[4];
-         
-          //get three ints for R, G and B
-          rgbArray = getPixelArray(picture[i][j]);
-         
-        
-           rgbArray[1] = 0;
-           //take three ints for R, G, B and put them back into a single int
-           picture[i][j] = getPixels(rgbArray);
+    for(int i=0; i<height; i++){
+    		for(int j=0; j<width; j++){
+    	   		int rgbArray[] = new int[4];
+    	   		//get three ints for R, G and B
+    	   		rgbArray = getPixelArray(picture[i][j]);
+    	   		rgbArray[1] = 0;
+    	   		//take three ints for R, G, B and put them back into a single int
+    	   		picture[i][j] = getPixels(rgbArray);
         } 
-     resetPicture(height, width, picture);
+    }
+    resetPicture(height, width, picture);
   }
   
- //Method to rotate an image by 90 degrees
- //put height=0,width=0 to height=height, width=0 
- private void rotate90() {
-	//get all of the original pixels
-	int[][] rotatedPicture = new int[width][height];
-	for(int i = 0; i < height; i++) {
-		 for(int j = 0; j < width; j++){   
-			 int rgbArray[] = new int[4];
-	         //get three ints for R, G and B
-	         rgbArray = getPixelArray(picture[i][j]);
-	         placePixel(rgbArray, rotatedPicture);
-       } 
-	}
-	resetPicture(height, width, rotatedPicture);
- }
- private void placePixel(int rgbArray[], int[][] rotatedPicture) {
-	//change the width to the old height, and the height to the old width.
-		int tempWidth = height;
-		int tempHeight = width;
-		//create new picture with given dimensions.
-		//change the orientation of the old picture to 90 degrees.
-		 for(int i = 0; i < tempHeight; i++) {
-			 for(int j = 0; j < tempWidth; j++){   
-		         rotatedPicture[i][j] = getPixels(rgbArray); 
-	        } 
-		 }
+  /*\
+   * Method to rotate an image by 90 degrees
+   * put height=0,width=0 to height=height, width=0 
+  \*/
+  private void rotate90() {
+	  //get all of the original pixels
+	  int[][] rotatedPicture = new int[width][height];
+	  for(int i = 0; i < height; i++) {
+		  for(int j = 0; j < width; j++){   
+			  int rgbArray[] = new int[4];
+			  //get three ints for R, G and B
+			  rgbArray = getPixelArray(picture[i][j]);
+			  placePixel(rgbArray, rotatedPicture);
+		  } 
+	  }
+	  resetPicture(width, height, rotatedPicture);
   }
-  private void quit()
-  {  
+  private void placePixel(int rgbArray[], int[][] rotatedPicture) {
+	  //change the width to the old height, and the height to the old width.
+	  int tempWidth = height;
+	  int tempHeight = width;
+	  //create new picture with given dimensions.
+	  //change the orientation of the old picture to 90 degrees.
+	  for(int i = 0; i < tempHeight; i++) {
+		  for(int j = 0; j < tempWidth; j++){   
+			  rotatedPicture[i][j] = getPixels(rgbArray); 
+	      } 
+	  }
+  }
+  private void quit(){  
      System.exit(0);
   }
 
@@ -336,9 +329,7 @@ class IMP implements MouseListener{
     @Override
    public void mouseReleased(MouseEvent m){}
    
-   public static void main(String [] args)
-   {
+   public static void main(String [] args){
       IMP imp = new IMP();
    }
- 
 }
