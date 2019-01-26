@@ -93,17 +93,14 @@ class IMP implements MouseListener{
     * for handling the choice, fun1, fun2, fun3, fun4, etc. etc. 
     */
    
-  private JMenu getFunctions()
-  {
+  private JMenu getFunctions(){
      JMenu fun = new JMenu("Functions");
-     
      JMenuItem firstItem = new JMenuItem("MyExample - fun1 method");
      JMenuItem secondItem = new JMenuItem("Rotate Image: 90 Degrees");
      JMenuItem thirdItem = new JMenuItem("Gray Scale");
      JMenuItem fourthItem = new JMenuItem("Blur Image");
      JMenuItem fifthItem = new JMenuItem("Gray Scale With Mask");
      JMenuItem sixthItem = new JMenuItem("Track Object");
-     
      
      firstItem.addActionListener(new ActionListener(){
             @Override
@@ -113,14 +110,16 @@ class IMP implements MouseListener{
          @Override
        public void actionPerformed(ActionEvent evt){rotate90();}
         });
-       
+     thirdItem.addActionListener(new ActionListener(){
+         @Override
+       public void actionPerformed(ActionEvent evt){grayScale();}
+        });
       fun.add(firstItem);
       fun.add(secondItem);
       fun.add(thirdItem);
       fun.add(fourthItem);
       fun.add(fifthItem);
       fun.add(sixthItem);
-     
       return fun;   
 
   }
@@ -129,56 +128,50 @@ class IMP implements MouseListener{
    * This method handles opening an image file, breaking down the picture to a one-dimensional array and then drawing the image on the frame. 
    * You don't need to worry about this method. 
    */
-    private void handleOpen()
-  {  
-     img = new ImageIcon();
-     JFileChooser chooser = new JFileChooser();
-      Preferences pref = Preferences.userNodeForPackage(IMP.class);
-      String path = pref.get("DEFAULT_PATH", "");
+    private void handleOpen() {
+    		img = new ImageIcon();
+    		JFileChooser chooser = new JFileChooser();
+    		Preferences pref = Preferences.userNodeForPackage(IMP.class);
+    		String path = pref.get("DEFAULT_PATH", "");
 
-      chooser.setCurrentDirectory(new File(path));
-     int option = chooser.showOpenDialog(frame);
+    		chooser.setCurrentDirectory(new File(path));
+    		int option = chooser.showOpenDialog(frame);
      
-     if(option == JFileChooser.APPROVE_OPTION) {
-        pic = chooser.getSelectedFile();
-        pref.put("DEFAULT_PATH", pic.getAbsolutePath());
-       img = new ImageIcon(pic.getPath());
-      }
-     width = img.getIconWidth();
-     height = img.getIconHeight(); 
-     
-     JLabel label = new JLabel(img);
-     label.addMouseListener(this);
-     pixels = new int[width*height];
-     
-     results = new int[width*height];
-  
-          
-     Image image = img.getImage();
-        
-     PixelGrabber pg = new PixelGrabber(image, 0, 0, width, height, pixels, 0, width );
-     try{
-         pg.grabPixels();
-     }catch(InterruptedException e)
-       {
-          System.err.println("Interrupted waiting for pixels");
-          return;
-       }
-     for(int i = 0; i<width*height; i++)
-        results[i] = pixels[i];  
-     turnTwoDimensional();
-     mp.removeAll();
-     mp.add(label);
-     
-     mp.revalidate();
-  }
-  
+    		if(option == JFileChooser.APPROVE_OPTION) {
+    			pic = chooser.getSelectedFile();
+    			pref.put("DEFAULT_PATH", pic.getAbsolutePath());
+    			img = new ImageIcon(pic.getPath());
+    		}
+    		width = img.getIconWidth();
+	     height = img.getIconHeight(); 
+	     JLabel label = new JLabel(img);
+	     label.addMouseListener(this);
+	     pixels = new int[width*height]; 
+	     results = new int[width*height];       
+	     Image image = img.getImage();
+	        
+	     PixelGrabber pg = new PixelGrabber(image, 0, 0, width, height, pixels, 0, width );
+	     try{
+	         pg.grabPixels();
+	     }
+	     catch(InterruptedException e){
+	          System.err.println("Interrupted waiting for pixels");
+	          return;
+	     }
+	     for(int i = 0; i<width*height; i++) {
+	        results[i] = pixels[i];  
+	     }
+	     turnTwoDimensional();
+	     mp.removeAll();
+	     mp.add(label);
+	     mp.revalidate();
+	  }
+	  
   /*
    * The libraries in Java give a one dimensional array of RGB values for an image, I thought a 2-Dimensional array would be more usefull to you
    * So this method changes the one dimensional array to a two-dimensional. 
    */
-  private void turnTwoDimensional()
-  {
+  private void turnTwoDimensional(){
      picture = new int[height][width];
      for(int i=0; i<height; i++)
        for(int j=0; j<width; j++)
@@ -189,7 +182,7 @@ class IMP implements MouseListener{
    *  This method takes the picture back to the original picture
    */
   private void reset(){
-	  if(img != null) {
+	  if(img != null) {//if there is an image previously selected, allow it to be reset.
 		   JLabel label = new JLabel(img);
 		   label.addMouseListener(this);
 	       Image image = img.getImage();
@@ -210,7 +203,7 @@ class IMP implements MouseListener{
 	       mp.add(label);
 	       mp.revalidate();
 	  }
-	  else {
+	  else {//handle if the user selects reset before importing an image
 		  JOptionPane.showMessageDialog(mp, "Error: No picture selected. Open an image and Try again.");
 	  }
     }
@@ -295,12 +288,9 @@ class IMP implements MouseListener{
 			  int rgbArray[] = new int[4];
 			  //get three ints for R, G and B
 			  rgbArray = getPixelArray(picture[i][j]);
-			  placePixel(width-i-1, height-j-1, rgbArray, rotatedPicture);
+			  placePixel(j, i, rgbArray, rotatedPicture);
 		  } 
 	  }
-	  //i=0,j=0: placePixel(width,height...)
-	  //i=0,j=1: placePixel(height,width-1...)
-	  //i=0,j=2: placePixel(height,width-2...)
 	  resetPicture(width, height, rotatedPicture);
   }
   private void placePixel(int row, int col, int rgbArray[], int[][] rotatedPicture) {
@@ -309,7 +299,22 @@ class IMP implements MouseListener{
 		rotatedPicture[row][col] = getPixels(rgbArray); 
   }
   
-  
+  private void grayScale() {
+	  for(int i = 0; i < height; i++) {
+		  for(int j = 0; j < width; j++){   
+			  int rgbArray[] = new int[4];
+			  //get four ints for A, R, G and B
+			  rgbArray = getPixelArray(picture[i][j]);
+			  // luminosity function 0.21 R + 0.72 G + 0.07 B
+			  rgbArray[1] = (int) (rgbArray[1] * 0.21);//red
+			  rgbArray[2] = (int) (rgbArray[2] * 0.72);//green
+			  rgbArray[3] = (int) (rgbArray[3] * 0.07);//blue
+	  	   	  //take three ints for R, G, B and put them back into a single int
+	  	   	  picture[i][j] = getPixels(rgbArray);
+		  } 
+	  }
+	  resetPicture(height,width,picture);
+  }
   private void quit(){  
      System.exit(0);
   }
