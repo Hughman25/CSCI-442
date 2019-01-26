@@ -306,9 +306,9 @@ class IMP implements MouseListener{
 			  //get four ints for A, R, G and B
 			  rgbArray = getPixelArray(picture[i][j]);
 			  // luminosity function 0.21 R + 0.72 G + 0.07 B
-			  rgbArray[1] = (int) (rgbArray[1] * 0.21);//red
-			  rgbArray[2] = (int) (rgbArray[2] * 0.72);//green
-			  rgbArray[3] = (int) (rgbArray[3] * 0.07);//blue
+			  rgbArray[1] = (int) ((rgbArray[1] * 0.21) + (rgbArray[2] * 0.72) + (rgbArray[3] * 0.07));//red
+			  rgbArray[2] = (int) ((rgbArray[2] * 0.21) + (rgbArray[2] * 0.72) + (rgbArray[3] * 0.07));//green
+			  rgbArray[3] = (int) ((rgbArray[3] * 0.21) + (rgbArray[2] * 0.72) + (rgbArray[3] * 0.07));//blue
 	  	   	  //take three ints for R, G, B and put them back into a single int
 	  	   	  picture[i][j] = getPixels(rgbArray);
 		  } 
