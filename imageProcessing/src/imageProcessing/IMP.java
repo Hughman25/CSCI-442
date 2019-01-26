@@ -114,6 +114,10 @@ class IMP implements MouseListener{
          @Override
        public void actionPerformed(ActionEvent evt){grayScale();}
         });
+     fourthItem.addActionListener(new ActionListener(){
+         @Override
+       public void actionPerformed(ActionEvent evt){blur();}
+        });
       fun.add(firstItem);
       fun.add(secondItem);
       fun.add(thirdItem);
@@ -311,6 +315,38 @@ class IMP implements MouseListener{
 			  rgbArray[3] = (int) ((rgbArray[3] * 0.21) + (rgbArray[2] * 0.72) + (rgbArray[3] * 0.07));//blue
 	  	   	  //take three ints for R, G, B and put them back into a single int
 	  	   	  picture[i][j] = getPixels(rgbArray);
+		  } 
+	  }
+	  resetPicture(height,width,picture);
+  }
+  
+  private void blur() {
+	  int[][] picture2 = picture;
+	  int rgbArrayTopLeft[] = new int[4];
+	  int rgbArrayTop[] = new int[4];
+	  int rgbArrayTopRight[] = new int[4];
+	  int rgbArrayLeft[] = new int[4];
+	  int rgbArrayRight[] = new int[4];
+	  int rgbArrayBottomLeft[] = new int[4];
+	  int rgbArrayBottom[] = new int[4];
+	  int rgbArrayBottomRight[] = new int[4];
+	  int rgbArrayCenter[] = new int[4];
+	  for(int i = 1; i < height - 1; i++) {
+		  for(int j = 1; j < width - 1; j++){   
+			  
+			  //get four ints for A, R, G and B from surrounding pixels
+			  rgbArrayTopLeft = getPixelArray(picture[i-1][j-1]);
+			  rgbArrayTop = getPixelArray(picture[i-1][j]);
+			  rgbArrayTopRight = getPixelArray(picture[i-1][j+1]);
+			  rgbArrayLeft = getPixelArray(picture[i][j-1]);
+			  rgbArrayRight = getPixelArray(picture[i][j+1]);
+			  rgbArrayBottomLeft = getPixelArray(picture[i+1][j-1]);
+			  rgbArrayBottom = getPixelArray(picture[i+1][j]);
+			  rgbArrayBottomRight = getPixelArray(picture[i+1][j+1]);
+			  rgbArrayCenter = getPixelArray(picture[i][j]);
+			  
+	  	   	  //take three ints for R, G, B and put them back into a single int
+	  	   	  //picture[i][j] = getPixels(rgbArray);
 		  } 
 	  }
 	  resetPicture(height,width,picture);
