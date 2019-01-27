@@ -11,6 +11,8 @@ import java.io.File;
 import java.awt.image.PixelGrabber;
 import java.awt.image.MemoryImageSource;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.prefs.Preferences;
 
 class IMP implements MouseListener{
@@ -99,8 +101,9 @@ class IMP implements MouseListener{
      JMenuItem secondItem = new JMenuItem("Rotate Image: 90 Degrees");
      JMenuItem thirdItem = new JMenuItem("Gray Scale");
      JMenuItem fourthItem = new JMenuItem("Blur Image");
-     JMenuItem fifthItem = new JMenuItem("Gray Scale With Mask");
-     JMenuItem sixthItem = new JMenuItem("Track Object");
+     JMenuItem fifthItem = new JMenuItem("Show Histogram");
+     JMenuItem sixthItem = new JMenuItem("Equalize Image");
+     JMenuItem seventhItem = new JMenuItem("Track Object");
      
      firstItem.addActionListener(new ActionListener(){
             @Override
@@ -118,12 +121,21 @@ class IMP implements MouseListener{
          @Override
        public void actionPerformed(ActionEvent evt){blur();}
         });
+     fifthItem.addActionListener(new ActionListener(){
+         @Override
+       public void actionPerformed(ActionEvent evt){showHistogram();}
+        });
+     sixthItem.addActionListener(new ActionListener(){
+         @Override
+       public void actionPerformed(ActionEvent evt){equalizeImage();}
+        });
       fun.add(firstItem);
       fun.add(secondItem);
       fun.add(thirdItem);
       fun.add(fourthItem);
       fun.add(fifthItem);
       fun.add(sixthItem);
+      fun.add(seventhItem);
       return fun;   
 
   }
@@ -323,18 +335,12 @@ class IMP implements MouseListener{
   
   private void blur() {
 	  int[][] picture2 = picture;
-	  
-	  int rgbArrayLeft[] = new int[4];
-	  int rgbArrayRight[] = new int[4];
-	  int rgbArrayBottomLeft[] = new int[4];
-	  int rgbArrayBottom[] = new int[4];
-	  int rgbArrayBottomRight[] = new int[4];
-	  int rgbArrayCenter[] = new int[4];
 	  int rgbArray[] = new int[4];
+	  
 	  for(int i = 2; i < height - 2; i++) {
 		  for(int j = 2; j < width - 2; j++){   
 			  
-			  //get four ints for A, R, G and B from surrounding pixels
+			  //get four integers for A, R, G and B from surrounding pixels
 			  //top row
 			  int[] top0 = getPixelArray(picture[i-2][j-2]);
 			  int[] top1 = getPixelArray(picture[i-2][j-1]);
@@ -370,18 +376,54 @@ class IMP implements MouseListener{
 				         + row1R[3] + row2R[3] + row3R[3] + bottom0[3] + bottom1[3] + bottom2[3] + bottom3[3] + bottom4[3]) / 16;
 			  
 	  	   	  //take three ints for R, G, B and put them back into a single int
-			  rgbArray[0] = 255;
+			  rgbArray[0] = 255; //set Alpha to 255 for every iteration
 			  rgbArray[1] = redAverage;
 			  rgbArray[2] = greenAverage;
 			  rgbArray[3] = blueAverage;
 			  picture2[i][j] = getPixels(rgbArray);
-	  	   	  //picture[i][j] = getPixels(rgbArray);
 		  }
-		  
 	  }
-	  
+	  //set the picture equal to the blurred image
 	  picture = picture2;
 	  resetPicture(height,width,picture);
+  }
+  
+  private void showHistogram() {
+	  int red = 0;
+	  int green = 0;
+	  int blue = 0;
+	  int rgbArray[] = new int[4];
+	  //map: (0-255, frequency)
+	  HashMap<Integer, Integer> redfreq = new HashMap<Integer,Integer>();
+	  HashMap<Integer, Integer> greenfreq = new HashMap<Integer,Integer>();
+	  HashMap<Integer, Integer> bluefreq = new HashMap<Integer,Integer>();
+	  //initialize all frequencies to 0
+	  for(int i = 0; i <= 255; i++) {
+		  redfreq.put(i,0);
+		  greenfreq.put(i,0);
+		  bluefreq.put(i,0);
+	  }
+	  for(int i = 0; i < height; i++) {
+		  for(int j = 0; j < width; j++) {
+			  rgbArray = getPixelArray(picture[i][j]);			 
+			  redfreq.put(rgbArray[1], redfreq.get(rgbArray[1]) + 1);
+			  greenfreq.put(rgbArray[2], redfreq.get(rgbArray[1]) + 1);
+			  bluefreq.put(rgbArray[3], redfreq.get(rgbArray[1]) + 1);
+		  }
+	  }
+	  MyPanel redPanel   = new MyPanel("red", redfreq);
+	  MyPanel greenPanel = new MyPanel("green", greenfreq);
+	  MyPanel bluePanel  = new MyPanel("blue", bluefreq);
+	  redPanel.drawHistogram(start, redPanel);
+	  greenPanel.drawHistogram(start, greenPanel);
+	  bluePanel.drawHistogram(start, bluePanel);
+  }
+  private void equalizeImage() {
+	  for(int i = 0; i < height; i++) {
+		  for(int j = 0; j < width; j++) {
+			  
+		  }
+	  }
   }
   private void quit(){  
      System.exit(0);
