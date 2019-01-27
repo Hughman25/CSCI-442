@@ -310,6 +310,7 @@ class IMP implements MouseListener{
 			  //get four ints for A, R, G and B
 			  rgbArray = getPixelArray(picture[i][j]);
 			  // luminosity function 0.21 R + 0.72 G + 0.07 B
+			  rgbArray[0] = 255;
 			  rgbArray[1] = (int) ((rgbArray[1] * 0.21) + (rgbArray[2] * 0.72) + (rgbArray[3] * 0.07));//red
 			  rgbArray[2] = (int) ((rgbArray[2] * 0.21) + (rgbArray[2] * 0.72) + (rgbArray[3] * 0.07));//green
 			  rgbArray[3] = (int) ((rgbArray[3] * 0.21) + (rgbArray[2] * 0.72) + (rgbArray[3] * 0.07));//blue
@@ -322,33 +323,64 @@ class IMP implements MouseListener{
   
   private void blur() {
 	  int[][] picture2 = picture;
-	  int rgbArrayTopLeft[] = new int[4];
-	  int rgbArrayTop[] = new int[4];
-	  int rgbArrayTopRight[] = new int[4];
+	  
 	  int rgbArrayLeft[] = new int[4];
 	  int rgbArrayRight[] = new int[4];
 	  int rgbArrayBottomLeft[] = new int[4];
 	  int rgbArrayBottom[] = new int[4];
 	  int rgbArrayBottomRight[] = new int[4];
 	  int rgbArrayCenter[] = new int[4];
-	  for(int i = 1; i < height - 1; i++) {
-		  for(int j = 1; j < width - 1; j++){   
+	  int rgbArray[] = new int[4];
+	  for(int i = 2; i < height - 2; i++) {
+		  for(int j = 2; j < width - 2; j++){   
 			  
 			  //get four ints for A, R, G and B from surrounding pixels
-			  rgbArrayTopLeft = getPixelArray(picture[i-1][j-1]);
-			  rgbArrayTop = getPixelArray(picture[i-1][j]);
-			  rgbArrayTopRight = getPixelArray(picture[i-1][j+1]);
-			  rgbArrayLeft = getPixelArray(picture[i][j-1]);
-			  rgbArrayRight = getPixelArray(picture[i][j+1]);
-			  rgbArrayBottomLeft = getPixelArray(picture[i+1][j-1]);
-			  rgbArrayBottom = getPixelArray(picture[i+1][j]);
-			  rgbArrayBottomRight = getPixelArray(picture[i+1][j+1]);
-			  rgbArrayCenter = getPixelArray(picture[i][j]);
+			  //top row
+			  int[] top0 = getPixelArray(picture[i-2][j-2]);
+			  int[] top1 = getPixelArray(picture[i-2][j-1]);
+			  int[] top2 = getPixelArray(picture[i-2][j]);
+			  int[] top3 = getPixelArray(picture[i-2][j+1]);
+			  int[] top4 = getPixelArray(picture[i-2][j+2]);
+			  
+			  //left column between top row and bottom row
+			  int[] row1L = getPixelArray(picture[i-1][j-2]);
+			  int[] row2L = getPixelArray(picture[i][j-2]);
+			  int[] row3L = getPixelArray(picture[i+1][j-2]);
+			  
+			  //right column between top row and bottom row
+			  int[] row1R = getPixelArray(picture[i-1][j+2]);
+			  int[] row2R = getPixelArray(picture[i][j+2]);
+			  int[] row3R = getPixelArray(picture[i+1][j+2]);
+			  
+			  //bottom row
+			  int[] bottom0 = getPixelArray(picture[i+2][j-2]);
+			  int[] bottom1 = getPixelArray(picture[i+2][j-1]);
+			  int[] bottom2 = getPixelArray(picture[i+2][j]);
+			  int[] bottom3 = getPixelArray(picture[i+2][j+1]);
+			  int[] bottom4 = getPixelArray(picture[i+2][j+2]);
+			  
+			  
+			  int redAverage = (int)(top0[1] + top1[1] + top2[1] + top3[1] + top4[1] + row1L[1] + row2L[1] + row3L[1]
+					         + row1R[1] + row2R[1] + row3R[1] + bottom0[1] + bottom1[1] + bottom2[1] + bottom3[1] + bottom4[1]) / 16;
+			  
+			  int greenAverage = (int)(top0[2] + top1[2] + top2[2] + top3[2] + top4[2] + row1L[2] + row2L[2] + row3L[2]
+				         + row1R[2] + row2R[2] + row3R[2] + bottom0[2] + bottom1[2] + bottom2[2] + bottom3[2] + bottom4[2]) / 16;
+			  
+			  int blueAverage = (int)(top0[3] + top1[3] + top2[3] + top3[3] + top4[3] + row1L[3] + row2L[3] + row3L[3]
+				         + row1R[3] + row2R[3] + row3R[3] + bottom0[3] + bottom1[3] + bottom2[3] + bottom3[3] + bottom4[3]) / 16;
 			  
 	  	   	  //take three ints for R, G, B and put them back into a single int
+			  rgbArray[0] = 255;
+			  rgbArray[1] = redAverage;
+			  rgbArray[2] = greenAverage;
+			  rgbArray[3] = blueAverage;
+			  picture2[i][j] = getPixels(rgbArray);
 	  	   	  //picture[i][j] = getPixels(rgbArray);
-		  } 
+		  }
+		  
 	  }
+	  
+	  picture = picture2;
 	  resetPicture(height,width,picture);
   }
   private void quit(){  
