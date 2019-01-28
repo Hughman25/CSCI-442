@@ -1,5 +1,5 @@
 /*
- *Hunter Lloyd
+ *Hunter Lloyd & Matthew Sagen
  * Copyrite.......I wrote, ask permission if you want to use it outside of class. 
  */
 package imageProcessing;
@@ -10,9 +10,7 @@ import java.awt.event.*;
 import java.io.File;
 import java.awt.image.PixelGrabber;
 import java.awt.image.MemoryImageSource;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.prefs.Preferences;
 
 class IMP implements MouseListener{
@@ -46,7 +44,7 @@ class IMP implements MouseListener{
    IMP()
    {
       toolkit = Toolkit.getDefaultToolkit();
-      frame = new JFrame("Image Processing Software by Hunter & Matthew");
+      frame = new JFrame("Image Processing Software by Hunter");
       JMenuBar bar = new JMenuBar();
       JMenu file = new JMenu("File");
       JMenu functions = getFunctions();
@@ -301,6 +299,7 @@ class IMP implements MouseListener{
   \*/
   private void rotate90() {
 	  //get all of the original pixels
+	  //rotate them around the center pixel 90 degrees.
 	  int[][] rotatedPicture = new int[width][height];
 	  for(int i = 0; i < height; i++) {
 		  for(int j = 0; j < width; j++){   
@@ -322,8 +321,8 @@ class IMP implements MouseListener{
 			  // luminosity function 0.21 R + 0.72 G + 0.07 B
 			  rgbArray[0] = 255;
 			  rgbArray[1] = (int) ((rgbArray[1] * 0.21) + (rgbArray[2] * 0.72) + (rgbArray[3] * 0.07));//red
-			  rgbArray[2] = (int) ((rgbArray[2] * 0.21) + (rgbArray[2] * 0.72) + (rgbArray[3] * 0.07));//green
-			  rgbArray[3] = (int) ((rgbArray[3] * 0.21) + (rgbArray[2] * 0.72) + (rgbArray[3] * 0.07));//blue
+			  rgbArray[2] = (int) ((rgbArray[1] * 0.21) + (rgbArray[2] * 0.72) + (rgbArray[3] * 0.07));//green
+			  rgbArray[3] = (int) ((rgbArray[1] * 0.21) + (rgbArray[2] * 0.72) + (rgbArray[3] * 0.07));//blue
 	  	   	  //take three ints for R, G, B and put them back into a single int
 	  	   	  picture[i][j] = getPixels(rgbArray);
 		  } 
@@ -387,9 +386,6 @@ class IMP implements MouseListener{
   }
   
   private void showHistogram() {
-	  int red = 0;
-	  int green = 0;
-	  int blue = 0;
 	  int rgbArray[] = new int[4];
 	  //map: (0-255, frequency)
 	  //initialize all frequencies to 0
