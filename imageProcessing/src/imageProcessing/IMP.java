@@ -27,6 +27,9 @@ class IMP implements MouseListener{
    int colorX, colorY;
    int [] pixels;
    int [] results;
+   private HashMap<Integer, Integer> redfreq = new HashMap<Integer,Integer>();
+   private HashMap<Integer, Integer> greenfreq = new HashMap<Integer,Integer>();
+   private HashMap<Integer, Integer> bluefreq = new HashMap<Integer,Integer>();
    //Instance Fields you will be using below
    
    //This will be your height and width of your 2d array
@@ -304,15 +307,10 @@ class IMP implements MouseListener{
 			  int rgbArray[] = new int[4];
 			  //get three ints for R, G and B
 			  rgbArray = getPixelArray(picture[i][j]);
-			  placePixel(j, i, rgbArray, rotatedPicture);
+			  rotatedPicture[j][i] = getPixels(rgbArray);
 		  } 
 	  }
 	  resetPicture(width, height, rotatedPicture);
-  }
-  private void placePixel(int row, int col, int rgbArray[], int[][] rotatedPicture) {
-	  //create new picture with given dimensions.
-	  //change the orientation of the old picture to 90 degrees.
-		rotatedPicture[row][col] = getPixels(rgbArray); 
   }
   
   private void grayScale() {
@@ -394,9 +392,6 @@ class IMP implements MouseListener{
 	  int blue = 0;
 	  int rgbArray[] = new int[4];
 	  //map: (0-255, frequency)
-	  HashMap<Integer, Integer> redfreq = new HashMap<Integer,Integer>();
-	  HashMap<Integer, Integer> greenfreq = new HashMap<Integer,Integer>();
-	  HashMap<Integer, Integer> bluefreq = new HashMap<Integer,Integer>();
 	  //initialize all frequencies to 0
 	  for(int i = 0; i <= 255; i++) {
 		  redfreq.put(i,0);
@@ -419,11 +414,35 @@ class IMP implements MouseListener{
 	  bluePanel.drawHistogram(start, bluePanel);
   }
   private void equalizeImage() {
-	  for(int i = 0; i < height; i++) {
-		  for(int j = 0; j < width; j++) {
-			  
+	  //Cumulative distribution function (cdf)
+	  //equalization formula: intensity = round(((cdf(v)-cdfmin)/(widht x height)-cdfmin))x(Number of gray levels used - 1)
+	  
+	  int[] cdfmin = new int[4];
+	  //get the minimum value from the table
+	  for(int i = 0; i <= 255; i++) {
+		  if(redfreq.get(i) > 0) {
+			  cdfmin[0] = 255;
+			  cdfmin[1] = redfreq.get(i);
+			  cdfmin[2] = greenfreq.get(i);
+			  cdfmin[3] = bluefreq.get(i);
+			  return;
+		  }
+		  else if(greenfreq.get(i) > 0) {
+			  cdfmin[0] = 255;
+			  cdfmin[1] = redfreq.get(i);
+			  cdfmin[2] = greenfreq.get(i);
+			  cdfmin[3] = bluefreq.get(i);
+			  return;
+		  }
+		  else if(bluefreq.get(i) > 0) {
+			  cdfmin[0] = 255;
+			  cdfmin[1] = redfreq.get(i);
+			  cdfmin[2] = greenfreq.get(i);
+			  cdfmin[3] = bluefreq.get(i);
+			  return;
 		  }
 	  }
+	  
   }
   private void quit(){  
      System.exit(0);
