@@ -63,7 +63,7 @@ int startX, flag, startY, endX, endY;
             gc.drawString(end, 265, 415);
             //loop through the hashmap and plot the frequency of each intensity.
             for(int i = 0; i < freq.size(); i++) {
-            		gc.drawLine(i+25, 400, i+25, 400-freq.get(i));
+            		gc.drawLine(i+25, 400, i+25, 400-(freq.get(i)/5));
             }
 
          }

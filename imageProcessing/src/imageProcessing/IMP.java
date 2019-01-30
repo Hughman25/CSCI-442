@@ -130,6 +130,10 @@ class IMP implements MouseListener{
          @Override
        public void actionPerformed(ActionEvent evt){equalizeImage();}
         });
+     seventhItem.addActionListener(new ActionListener(){
+         @Override
+       public void actionPerformed(ActionEvent evt){trackObject();}
+        });
       fun.add(firstItem);
       fun.add(secondItem);
       fun.add(thirdItem);
@@ -412,33 +416,65 @@ class IMP implements MouseListener{
   private void equalizeImage() {
 	  //Cumulative distribution function (cdf)
 	  //equalization formula: intensity = round(((cdf(v)-cdfmin)/(widht x height)-cdfmin))x(Number of gray levels used - 1)
-	  
-	  int[] cdfmin = new int[4];
+	  /*
+	   * Original Red Value " + rgbArray[1]
+		 The accumultive frequency at this pixel " + r + ", " + c + " is " + red[rgbArray[1]]
+		 Total # of Pixels " + (width*height)
+		 Do the math
+		 round(frequency / total pixels) * max pixel value(255)"
+		 New red value " + Math.round(((float)red[rgbArray[1]]/(float)(width*height))*255.0)
+		 To calculate the frequency
+		 ++red[rgbArray[1]];
+	   */
+	  int totalPixels = width * height;
+	  int[] rgbArray = new int[4];
 	  //get the minimum value from the table
-	  for(int i = 0; i <= 255; i++) {
-		  if(redfreq.get(i) > 0) {
-			  cdfmin[0] = 255;
-			  cdfmin[1] = redfreq.get(i);
-			  cdfmin[2] = greenfreq.get(i);
-			  cdfmin[3] = bluefreq.get(i);
-			  return;
-		  }
-		  else if(greenfreq.get(i) > 0) {
-			  cdfmin[0] = 255;
-			  cdfmin[1] = redfreq.get(i);
-			  cdfmin[2] = greenfreq.get(i);
-			  cdfmin[3] = bluefreq.get(i);
-			  return;
-		  }
-		  else if(bluefreq.get(i) > 0) {
-			  cdfmin[0] = 255;
-			  cdfmin[1] = redfreq.get(i);
-			  cdfmin[2] = greenfreq.get(i);
-			  cdfmin[3] = bluefreq.get(i);
-			  return;
+	  //map: (0-255, frequency)
+	  for(int i = 0; i < height; i++) {
+		  for(int j = 0; j < width; j++) {
+			 rgbArray = getPixelArray(picture[i][j]);
+			 
+			 int newRed = Math.round(((float)redfreq.get(rgbArray[1])/(float)(totalPixels)) * 255);
+			 int newGreen = Math.round(((float)greenfreq.get(rgbArray[2])/(float)(totalPixels))* 255);
+			 int newBlue = Math.round(((float)bluefreq.get(rgbArray[3])/(float)(totalPixels))* 255);
+			 rgbArray[0] = 255;
+			 rgbArray[1] = newRed;
+			 rgbArray[2] = newGreen;
+			 rgbArray[3] = newBlue;
+			 System.out.println(newRed + ": " + newGreen + ": " + newBlue);
+			 picture[i][j] = getPixels(rgbArray);
+
 		  }
 	  }
+	  resetPicture(height,width,picture);
 	  
+  }
+  private void trackObject() {
+	  int[] rgbArray = new int[4];
+
+	  for(int i = 0; i < height; i++) {
+		  for(int j = 0; j < width; j++) {
+				 rgbArray = getPixelArray(picture[i][j]);
+				 if((rgbArray[1] < 255 && rgbArray[1] > 235) && 
+					(rgbArray[2] < 255 && rgbArray[2] > 155) && 
+					(rgbArray[3] < 255 && rgbArray[3] > 0)) {
+					 
+					 rgbArray[0] = 255;
+					 rgbArray[1] = 255;
+					 rgbArray[2] = 255;
+					 rgbArray[3] = 255;
+					 
+				 }
+				 else {
+					 rgbArray[0] = 255;
+					 rgbArray[1] = 0;
+					 rgbArray[2] = 0;
+					 rgbArray[3] = 0;
+				 }
+				 picture[i][j] = getPixels(rgbArray);
+		  }
+	  }
+	  resetPicture(height,width,picture);
   }
   private void quit(){  
      System.exit(0);
