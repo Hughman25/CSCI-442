@@ -10,6 +10,7 @@ import java.awt.event.*;
 import java.io.File;
 import java.awt.image.PixelGrabber;
 import java.awt.image.MemoryImageSource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.prefs.Preferences;
 
@@ -400,31 +401,35 @@ class IMP implements MouseListener{
   }
   private void mask() {
 	  grayScale();
-	  int[][] picture2 = picture;
-	  int rgbArray[] = new int[4];
+	  int[][] picture2 = new int[height][width];
+	  //int rgbArray[] = new int[4];
 	  int[][] mask = {{-1,-1,-1,-1,-1},
 				      {-1, 0, 0, 0,-1},
 				      {-1, 0, 16, 0,-1},
 				      {-1, 0, 0, 0,-1},
 				      {-1,-1,-1,-1,-1}};
-	  
-	  for(int i = 2; i < height - 2; i++) {
-		  for(int j = 2; j < width - 2; j++) {
+	  ArrayList<Integer> totals = new ArrayList<Integer>();
+	  for(int i = 2; i < height - 3; i++) {
+		  for(int j = 2; j < width - 3; j++) {
 			  //get four integers for A, R, G and B from surrounding pixels
 			  //top row
-			  int[] center = getPixelArray(picture[i][j]);
+			  int[] rgbArray = getPixelArray(picture[i][j]);
 			  int n = 0;
 			  int total = 0;
 			  for(int z = -2; z <= 2; z++) {
 				  int m = 0;
 				  total += getPixelArray(picture[i+z][j-2])[1] * mask[n][m++];
+				  
 				  total += getPixelArray(picture[i+z][j-1])[1] * mask[n][m++];
 				  total += getPixelArray(picture[i+z][j])[1] * mask[n][m++];
+				 
 				  total += getPixelArray(picture[i+z][j+1])[1] * mask[n][m++];
 				  total += getPixelArray(picture[i+z][j+2])[1] * mask[n][m++];
+				  
 				  n++;
 			  }
-			  if(total > 900 || total < -900) {
+			  totals.add(total);
+			  if(total < 1000 && total > -35) {
 				  rgbArray[0] = 255;
 				  rgbArray[1] = 0;
 				  rgbArray[2] = 0;
@@ -432,18 +437,18 @@ class IMP implements MouseListener{
 			  }			
 			  else {
 				  rgbArray[0] = 255;
-				  rgbArray[1] = center[1];
-				  rgbArray[2] = center[2];
-				  rgbArray[3] = center[3];
-				  /*
-				  for(int k = 1; k < rgbArray.length-1; k++) {
-					  rgbArray[k] = center[i];
-				  }*/
+				  rgbArray[1] = 255;
+				  rgbArray[2] = 255;
+				  rgbArray[3] = 255;
 			  }
 			  picture2[i][j] = getPixels(rgbArray);
 		  }
 	  }
-	
+	  int sum = 0;
+	  for(int i = 0; i < totals.size(); i++) {
+		  sum += totals.get(i);
+	  }
+	  System.out.println(sum/totals.size());
 	  resetPicture(height,width,picture2);
   }
   private void showHistogram() {
