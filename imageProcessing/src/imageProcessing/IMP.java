@@ -18,6 +18,7 @@ class IMP implements MouseListener{
    JPanel mp;
    JButton start;
    JScrollPane scroll;
+   
    JMenuItem openItem, exitItem, resetItem;
    Toolkit toolkit;
    File pic;
@@ -28,6 +29,9 @@ class IMP implements MouseListener{
    private HashMap<Integer, Integer> redfreq = new HashMap<Integer,Integer>();
    private HashMap<Integer, Integer> greenfreq = new HashMap<Integer,Integer>();
    private HashMap<Integer, Integer> bluefreq = new HashMap<Integer,Integer>();
+   private MyPanel redPanel = null;
+   private MyPanel greenPanel = null;
+   private MyPanel bluePanel = null;
    //Instance Fields you will be using below
    
    //This will be your height and width of your 2d array
@@ -299,11 +303,11 @@ class IMP implements MouseListener{
   
   /*\
    * Method to rotate an image by 90 degrees
-   * put height=0,width=0 to height=height, width=0 
   \*/
   private void rotate90() {
 	  //get all of the original pixels
 	  //rotate them around the center pixel 90 degrees.
+	 
 	  int[][] rotatedPicture = new int[width][height];
 	  for(int i = 0; i < height; i++) {
 		  for(int j = 0; j < width; j++){   
@@ -398,6 +402,7 @@ class IMP implements MouseListener{
 		  greenfreq.put(i,0);
 		  bluefreq.put(i,0);
 	  }
+	  //loop through picture and map the frequencies of each RGB value of each pixel.
 	  for(int i = 0; i < height; i++) {
 		  for(int j = 0; j < width; j++) {
 			  rgbArray = getPixelArray(picture[i][j]);			 
@@ -406,16 +411,15 @@ class IMP implements MouseListener{
 			  bluefreq.put(rgbArray[3], redfreq.get(rgbArray[1]) + 1);
 		  }
 	  }
-	  MyPanel redPanel   = new MyPanel("red", redfreq);
-	  MyPanel greenPanel = new MyPanel("green", greenfreq);
-	  MyPanel bluePanel  = new MyPanel("blue", bluefreq);
+	  //set up panels to show the histograms
+	  redPanel   = new MyPanel("red", redfreq);
+	  greenPanel = new MyPanel("green", greenfreq);
+	  bluePanel  = new MyPanel("blue", bluefreq);
 	  redPanel.drawHistogram(start, redPanel);
 	  greenPanel.drawHistogram(start, greenPanel);
 	  bluePanel.drawHistogram(start, bluePanel);
   }
   private void equalizeImage() {
-	  //Cumulative distribution function (cdf)
-	  //equalization formula: intensity = round(((cdf(v)-cdfmin)/(widht x height)-cdfmin))x(Number of gray levels used - 1)
 	  /*
 	   * Original Red Value " + rgbArray[1]
 		 The accumultive frequency at this pixel " + r + ", " + c + " is " + red[rgbArray[1]]
@@ -425,28 +429,48 @@ class IMP implements MouseListener{
 		 New red value " + Math.round(((float)red[rgbArray[1]]/(float)(width*height))*255.0)
 		 To calculate the frequency
 		 ++red[rgbArray[1]];
-	   */
-	  int totalPixels = width * height;
-	  int[] rgbArray = new int[4];
-	  //get the minimum value from the table
-	  //map: (0-255, frequency)
-	  for(int i = 0; i < height; i++) {
-		  for(int j = 0; j < width; j++) {
-			 rgbArray = getPixelArray(picture[i][j]);
-			 
-			 int newRed = Math.round(((float)redfreq.get(rgbArray[1])/(float)(totalPixels)) * 255);
-			 int newGreen = Math.round(((float)greenfreq.get(rgbArray[2])/(float)(totalPixels))* 255);
-			 int newBlue = Math.round(((float)bluefreq.get(rgbArray[3])/(float)(totalPixels))* 255);
-			 rgbArray[0] = 255;
-			 rgbArray[1] = newRed;
-			 rgbArray[2] = newGreen;
-			 rgbArray[3] = newBlue;
-			 System.out.println(newRed + ": " + newGreen + ": " + newBlue);
-			 picture[i][j] = getPixels(rgbArray);
-
+	  */
+	  //only allow equalization if the histogram has been displayed
+	  if(redPanel != null && greenPanel != null && bluePanel !=null) {
+		  double totalPixels = width * height;
+		  int[] rgbArray = new int[4];
+		  double cR = 0;
+		  double cG = 0;
+		  double cB = 0;
+		  double[] cuR = new double[256];
+		  double[] cuG = new double[256];
+		  double[] cuB = new double[256];
+		  
+		  for(int i = 0; i < 256; i++) {
+			  cR += redfreq.get(i);
+			  cG += greenfreq.get(i);
+			  cB += bluefreq.get(i);
+			  cuR[i] = cR*255/totalPixels;
+			  cuG[i] = cG*255/totalPixels;
+			  cuB[i] = cB*255/totalPixels;
+			  
 		  }
+		  //get the minimum value from the table
+		  //map: (0-255, frequency)
+		  for(int i = 0; i < height; i++) {
+			  for(int j = 0; j < width; j++) {
+				 rgbArray = getPixelArray(picture[i][j]);
+				 
+				// int newRed   = Math.round(((float)redfreq.get(rgbArray[1])  / totalPixels) * (float) 255);
+				// int newGreen = Math.round(((float)greenfreq.get(rgbArray[2])/ totalPixels) * (float) 255);
+				// int newBlue  = Math.round(((float)bluefreq.get(rgbArray[3]) / totalPixels) * (float) 255);
+				 rgbArray[0]  = 255;
+				 rgbArray[1]  = (int) cuR[rgbArray[1]];
+				 rgbArray[2]  = (int) cuG[rgbArray[2]];
+				 rgbArray[3]  = (int) cuB[rgbArray[3]];
+				 picture[i][j] = getPixels(rgbArray);
+			  }
+		  }
+		  resetPicture(height,width,picture);
 	  }
-	  resetPicture(height,width,picture);
+	  else {
+		  JOptionPane.showMessageDialog(mp, "Error: Must display histogram before choosing this option.");
+	  }
 	  
   }
   private void trackObject() {
