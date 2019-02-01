@@ -445,9 +445,9 @@ class IMP implements MouseListener{
 			  cR += redfreq.get(i);
 			  cG += greenfreq.get(i);
 			  cB += bluefreq.get(i);
-			  cuR[i] = cR*255/totalPixels;
-			  cuG[i] = cG*255/totalPixels;
-			  cuB[i] = cB*255/totalPixels;
+			  cuR[i] = (cR*255)/totalPixels;
+			  cuG[i] = (cG*255)/totalPixels;
+			  cuB[i] = (cB*255)/totalPixels;
 			  
 		  }
 		  //get the minimum value from the table
@@ -456,9 +456,6 @@ class IMP implements MouseListener{
 			  for(int j = 0; j < width; j++) {
 				 rgbArray = getPixelArray(picture[i][j]);
 				 
-				// int newRed   = Math.round(((float)redfreq.get(rgbArray[1])  / totalPixels) * (float) 255);
-				// int newGreen = Math.round(((float)greenfreq.get(rgbArray[2])/ totalPixels) * (float) 255);
-				// int newBlue  = Math.round(((float)bluefreq.get(rgbArray[3]) / totalPixels) * (float) 255);
 				 rgbArray[0]  = 255;
 				 rgbArray[1]  = (int) cuR[rgbArray[1]];
 				 rgbArray[2]  = (int) cuG[rgbArray[2]];
