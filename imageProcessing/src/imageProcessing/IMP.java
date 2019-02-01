@@ -316,12 +316,11 @@ class IMP implements MouseListener{
 	  //rotate them around the center pixel 90 degrees.
 	 
 	  int[][] rotatedPicture = new int[width][height];
-	  for(int i = 0; i < height; i++) {
-		  for(int j = 0; j < width; j++){   
-			  int rgbArray[] = new int[4];
-			  //get three ints for R, G and B
-			  rgbArray = getPixelArray(picture[i][j]);
-			  rotatedPicture[j][i] = getPixels(rgbArray);
+	  
+	  for(int i = 0; i < width; i++) {
+		  for(int j = height-1; j >= 0; j--){   
+			  
+			  rotatedPicture[width - (i+1)][j] = picture[j][i];
 		  } 
 	  }
 	  resetPicture(width, height, rotatedPicture);
@@ -405,7 +404,7 @@ class IMP implements MouseListener{
 	  int rgbArray[] = new int[4];
 	  int[][] mask = {{-1,-1,-1,-1,-1},
 				      {-1, 0, 0, 0,-1},
-				      {-1, 0, 10, 0,-1},
+				      {-1, 0, 16, 0,-1},
 				      {-1, 0, 0, 0,-1},
 				      {-1,-1,-1,-1,-1}};
 	  
@@ -416,7 +415,7 @@ class IMP implements MouseListener{
 			  int[] center = getPixelArray(picture[i][j]);
 			  int n = 0;
 			  int total = 0;
-			  for(int z = -2; z < 2; z++) {
+			  for(int z = -2; z <= 2; z++) {
 				  int m = 0;
 				  total += getPixelArray(picture[i+z][j-2])[1] * mask[n][m++];
 				  total += getPixelArray(picture[i+z][j-1])[1] * mask[n][m++];
@@ -425,26 +424,23 @@ class IMP implements MouseListener{
 				  total += getPixelArray(picture[i+z][j+2])[1] * mask[n][m++];
 				  n++;
 			  }
-			  if(total > 500) {
-				  rgbArray[0] = 0;
+			  if(total > 900 || total < -900) {
+				  rgbArray[0] = 255;
 				  rgbArray[1] = 0;
 				  rgbArray[2] = 0;
 				  rgbArray[3] = 0;
-			  }
-			  else if (total < -500){
-				  rgbArray[0] = 255;
-				  rgbArray[1] = 255;
-				  rgbArray[2] = 255;
-				  rgbArray[3] = 255;
-			  }
+			  }			
 			  else {
-				  for(int k = 1; k < rgbArray.length; k++) {
-					  rgbArray[k] = total;
-					  
-				  }
+				  rgbArray[0] = 255;
+				  rgbArray[1] = center[1];
+				  rgbArray[2] = center[2];
+				  rgbArray[3] = center[3];
+				  /*
+				  for(int k = 1; k < rgbArray.length-1; k++) {
+					  rgbArray[k] = center[i];
+				  }*/
 			  }
 			  picture2[i][j] = getPixels(rgbArray);
-			  
 		  }
 	  }
 	
@@ -497,7 +493,7 @@ class IMP implements MouseListener{
 		  double[] cuR = new double[256];
 		  double[] cuG = new double[256];
 		  double[] cuB = new double[256];
-		  
+		  //Cumulative function
 		  for(int i = 0; i < 256; i++) {
 			  cR += redfreq.get(i);
 			  cG += greenfreq.get(i);
@@ -507,8 +503,8 @@ class IMP implements MouseListener{
 			  cuB[i] = (cB/totalPixels)*255;
 			  
 		  }
-		  //get the minimum value from the table
 		  //map: (0-255, frequency)
+		  //map the pixels of old picture to the values of the cumalative function.
 		  for(int i = 0; i < height; i++) {
 			  for(int j = 0; j < width; j++) {
 				 rgbArray = getPixelArray(picture[i][j]);
@@ -527,15 +523,16 @@ class IMP implements MouseListener{
 	  }
 	  
   }
+  //track an image that is red
   private void trackObject() {
 	  int[] rgbArray = new int[4];
-
+	  //loop through picture, if pixel values fall within a specific range, turn pixel white, else turn pixel black.
 	  for(int i = 0; i < height; i++) {
 		  for(int j = 0; j < width; j++) {
 				 rgbArray = getPixelArray(picture[i][j]);
-				 if((rgbArray[1] < 255 && rgbArray[1] > 235) && 
-					(rgbArray[2] < 255 && rgbArray[2] > 155) && 
-					(rgbArray[3] < 255 && rgbArray[3] > 0)) {
+				 if((rgbArray[1] < 255 && rgbArray[1] > 200) && 
+					(rgbArray[2] < 164 && rgbArray[2] > 50) && 
+					(rgbArray[3] < 100 && rgbArray[3] > 10)) {
 					 
 					 rgbArray[0] = 255;
 					 rgbArray[1] = 255;
