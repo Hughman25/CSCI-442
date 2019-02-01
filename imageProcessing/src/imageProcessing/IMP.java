@@ -106,9 +106,10 @@ class IMP implements MouseListener{
      JMenuItem secondItem = new JMenuItem("Rotate Image: 90 Degrees");
      JMenuItem thirdItem = new JMenuItem("Gray Scale");
      JMenuItem fourthItem = new JMenuItem("Blur Image");
-     JMenuItem fifthItem = new JMenuItem("Show Histogram");
-     JMenuItem sixthItem = new JMenuItem("Equalize Image");
-     JMenuItem seventhItem = new JMenuItem("Track Object");
+     JMenuItem fifthItem = new JMenuItem("5x5 mask");
+     JMenuItem sixthItem = new JMenuItem("Show Histogram");
+     JMenuItem seventhItem = new JMenuItem("Equalize Image");
+     JMenuItem eigthItem = new JMenuItem("Track Object");
      
      firstItem.addActionListener(new ActionListener(){
             @Override
@@ -128,13 +129,17 @@ class IMP implements MouseListener{
         });
      fifthItem.addActionListener(new ActionListener(){
          @Override
-       public void actionPerformed(ActionEvent evt){showHistogram();}
+       public void actionPerformed(ActionEvent evt){mask();}
         });
      sixthItem.addActionListener(new ActionListener(){
          @Override
-       public void actionPerformed(ActionEvent evt){equalizeImage();}
+       public void actionPerformed(ActionEvent evt){showHistogram();}
         });
      seventhItem.addActionListener(new ActionListener(){
+         @Override
+       public void actionPerformed(ActionEvent evt){equalizeImage();}
+        });
+     eigthItem.addActionListener(new ActionListener(){
          @Override
        public void actionPerformed(ActionEvent evt){trackObject();}
         });
@@ -145,6 +150,8 @@ class IMP implements MouseListener{
       fun.add(fifthItem);
       fun.add(sixthItem);
       fun.add(seventhItem);
+      fun.add(eigthItem);
+
       return fun;   
 
   }
@@ -341,7 +348,7 @@ class IMP implements MouseListener{
   private void blur() {
 	  int[][] picture2 = picture;
 	  int rgbArray[] = new int[4];
-	  
+	  //5x5 blur
 	  for(int i = 2; i < height - 2; i++) {
 		  for(int j = 2; j < width - 2; j++){   
 			  
@@ -392,7 +399,57 @@ class IMP implements MouseListener{
 	  picture = picture2;
 	  resetPicture(height,width,picture);
   }
-  
+  private void mask() {
+	  grayScale();
+	  int[][] picture2 = picture;
+	  int rgbArray[] = new int[4];
+	  int[][] mask = {{-1,-1,-1,-1,-1},
+				      {-1, 0, 0, 0,-1},
+				      {-1, 0, 10, 0,-1},
+				      {-1, 0, 0, 0,-1},
+				      {-1,-1,-1,-1,-1}};
+	  
+	  for(int i = 2; i < height - 2; i++) {
+		  for(int j = 2; j < width - 2; j++) {
+			  //get four integers for A, R, G and B from surrounding pixels
+			  //top row
+			  int[] center = getPixelArray(picture[i][j]);
+			  int n = 0;
+			  int total = 0;
+			  for(int z = -2; z < 2; z++) {
+				  int m = 0;
+				  total += getPixelArray(picture[i+z][j-2])[1] * mask[n][m++];
+				  total += getPixelArray(picture[i+z][j-1])[1] * mask[n][m++];
+				  total += getPixelArray(picture[i+z][j])[1] * mask[n][m++];
+				  total += getPixelArray(picture[i+z][j+1])[1] * mask[n][m++];
+				  total += getPixelArray(picture[i+z][j+2])[1] * mask[n][m++];
+				  n++;
+			  }
+			  if(total > 500) {
+				  rgbArray[0] = 0;
+				  rgbArray[1] = 0;
+				  rgbArray[2] = 0;
+				  rgbArray[3] = 0;
+			  }
+			  else if (total < -500){
+				  rgbArray[0] = 255;
+				  rgbArray[1] = 255;
+				  rgbArray[2] = 255;
+				  rgbArray[3] = 255;
+			  }
+			  else {
+				  for(int k = 1; k < rgbArray.length; k++) {
+					  rgbArray[k] = total;
+					  
+				  }
+			  }
+			  picture2[i][j] = getPixels(rgbArray);
+			  
+		  }
+	  }
+	
+	  resetPicture(height,width,picture2);
+  }
   private void showHistogram() {
 	  int rgbArray[] = new int[4];
 	  //map: (0-255, frequency)
@@ -407,8 +464,8 @@ class IMP implements MouseListener{
 		  for(int j = 0; j < width; j++) {
 			  rgbArray = getPixelArray(picture[i][j]);			 
 			  redfreq.put(rgbArray[1], redfreq.get(rgbArray[1]) + 1);
-			  greenfreq.put(rgbArray[2], redfreq.get(rgbArray[1]) + 1);
-			  bluefreq.put(rgbArray[3], redfreq.get(rgbArray[1]) + 1);
+			  greenfreq.put(rgbArray[2], greenfreq.get(rgbArray[2]) + 1);
+			  bluefreq.put(rgbArray[3], bluefreq.get(rgbArray[3]) + 1);
 		  }
 	  }
 	  //set up panels to show the histograms
@@ -445,9 +502,9 @@ class IMP implements MouseListener{
 			  cR += redfreq.get(i);
 			  cG += greenfreq.get(i);
 			  cB += bluefreq.get(i);
-			  cuR[i] = (cR*255)/totalPixels;
-			  cuG[i] = (cG*255)/totalPixels;
-			  cuB[i] = (cB*255)/totalPixels;
+			  cuR[i] = (cR/totalPixels)*255;
+			  cuG[i] = (cG/totalPixels)*255;
+			  cuB[i] = (cB/totalPixels)*255;
 			  
 		  }
 		  //get the minimum value from the table

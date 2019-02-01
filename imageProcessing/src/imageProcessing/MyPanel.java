@@ -54,7 +54,6 @@ int startX, flag, startY, endX, endY;
             gc = grid.createGraphics();
             gc.drawLine(25, 400, 25, 25);
             gc.drawLine(25, 400, 280, 400);
-            char[] bounds = {'0','2','5','5'};
             String zero = "0";
             String end = "255";
             
