@@ -30,7 +30,7 @@ def nothing(x):
     pass
 
 #set new pixel to track when clicked (only for HSV window)
-def mouseCall(evt, x, y, flags, pic):
+def onMouse(evt, x, y, flags, pic):
     if evt==cv2.EVENT_LBUTTONDOWN:
         global res
         res = hsv[y][x]
@@ -44,13 +44,13 @@ def setScalars(h, s, v):
     maxHSV = np.array([res[0] + h, res[1] + s, res[2] + v])
 
 #create trackbars
-cv2.createTrackbar("Hue Tol.", "HSV", 0, 255,nothing)
-cv2.createTrackbar("Sat Tol.", "HSV", 0, 255,nothing)
-cv2.createTrackbar("Val Tol.", "HSV", 0, 255,nothing)
+cv2.createTrackbar("Hue", "HSV", 0, 255,nothing)
+cv2.createTrackbar("Sat", "HSV", 0, 255,nothing)
+cv2.createTrackbar("Val", "HSV", 0, 255,nothing)
 cv2.createTrackbar("1", "HSV", 0, 255,nothing)
 cv2.createTrackbar("2", "HSV", 0, 255,nothing)
 cv2.createTrackbar("3", "HSV", 0, 255,nothing)
-cv2.setMouseCallback("HSV", mouseCall, hsv)
+cv2.setMouseCallback("HSV", onMouse, hsv)
 
 rval, frame = cap.read() #read in video
 blank1 = np.float32(frame)
@@ -63,38 +63,38 @@ while True:
     val, img = cap.read() #read in video
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV) #convert to HSV
     black_white = cv2.inRange(hsv, minHSV, maxHSV) #create black and white image
-    img_erode = cv2.erode(black_white, kernel, iterations=2) 
-    img_dilate = cv2.dilate(img_erode, kernel, iterations=2) 
+    erode = cv2.erode(black_white, kernel, iterations=2) 
+    dilate = cv2.dilate(erode, kernel, iterations=2) 
 
     blur = cv2.GaussianBlur(img,(5,5),0)
     cv2.accumulateWeighted(blur, blank1, .320)
     res1 = cv2.convertScaleAbs(blank1)
     diff = cv2.absdiff(img, res1)
-    grayimg = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
-    _, grayimg = cv2.threshold(grayimg, 25, 255, cv2.THRESH_BINARY)
-    grayimg = cv2.GaussianBlur(grayimg,(5,5),0)
-    _, grayimg = cv2.threshold(grayimg, 220, 255, cv2.THRESH_BINARY)
-    contours, hierarchy = cv2.findContours(grayimg, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+    _, gray = cv2.threshold(gray, 25, 255, cv2.THRESH_BINARY)
+    gray = cv2.GaussianBlur(gray,(5,5),0)
+    _, gray = cv2.threshold(gray, 220, 255, cv2.THRESH_BINARY)
+    contours, hierarchy = cv2.findContours(gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     cv2.drawContours(frame, contours, -1, (0,255,0), 3)
     cv2.imshow("Video", frame)
-    cv2.imshow("Diff", grayimg)
+    cv2.imshow("Diff", gray)
 
 
     #create images in windows
     cv2.imshow("Original", img)
     cv2.imshow("HSV", hsv)
     cv2.imshow("Black/White", black_white)
-    cv2.imshow('Erosion', img_erode)
-    cv2.imshow('Dilation', img_dilate)
+    cv2.imshow('Erosion', erode)
+    cv2.imshow('Dilation', dilate)
     k = cv2.waitKey(1)
     if k == 27:
         break
 
     #get current positions of three trackbars
-    h = cv2.getTrackbarPos('Hue Tol.', 'HSV')
-    s = cv2.getTrackbarPos('Sat Tol.', 'HSV')
-    v = cv2.getTrackbarPos('Val Tol.', 'HSV')
+    h = cv2.getTrackbarPos('Hue', 'HSV')
+    s = cv2.getTrackbarPos('Sat', 'HSV')
+    v = cv2.getTrackbarPos('Val', 'HSV')
 
     #update tracking scalars
     setScalars(h, s, v)
