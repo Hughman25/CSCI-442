@@ -54,6 +54,16 @@ cv2.createTrackbar("2", "HSV", 0, 255,nothing)
 cv2.createTrackbar("3", "HSV", 0, 255,nothing)
 cv2.setMouseCallback("HSV", onMouse, hsv)
 
+'''
+# create trackbars for color change
+    cv2.createTrackbar('RL', 'HSV', 10, 255, nothing)
+    cv2.createTrackbar('RU', 'HSV', 10, 255, nothing)
+    cv2.createTrackbar('GL', 'HSV', 10, 255, nothing)
+    cv2.createTrackbar('GU', 'HSV', 10, 255, nothing)
+    cv2.createTrackbar('BL', 'HSV', 10, 255, nothing)
+    cv2.createTrackbar('BU', 'HSV', 10, 255, nothing)
+'''
+
 cap = cv2.VideoCapture(0)
 rval, frame = cap.read()
 

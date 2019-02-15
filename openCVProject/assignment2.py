@@ -31,7 +31,6 @@ def main():
 
     cv2.moveWindow("Avg2",700, 300)
 
-   # cv2.moveWindow("Res", 1100, 0)
     # create trackbars for color change
     cv2.createTrackbar('RL', 'HSV', 10, 255, nothing)
     cv2.createTrackbar('RU', 'HSV', 10, 255, nothing)
@@ -63,6 +62,8 @@ def main():
         cv2.accumulateWeighted(frame,avg2,0.01)
         res1 = cv2.convertScaleAbs(avg1)
         res2 = cv2.convertScaleAbs(avg2)
+
+        cv2.FindContours("Original", )
         #set mouse callback to print out color values
         cv2.setMouseCallback("Original", onMouse)
         # get current positions of four trackbars
