@@ -32,7 +32,6 @@ kernel = np.ones((5,5), np.uint8)
 def nothing(x):
     pass
 
-#set new pixel to track when clicked (only for HSV window)
 def onMouse(evt, x, y, flags, pic):
     if evt==cv2.EVENT_LBUTTONDOWN:
         global res
@@ -40,7 +39,7 @@ def onMouse(evt, x, y, flags, pic):
         print(str(x) + ", " + str(y))
         print(res)
 
-#set scalar values for tracking every loop
+#set scalar values
 def setScals(h, s, v):
     global res, minHSV, maxHSV
     minHSV = np.array([res[0] - h, res[1] - s, res[2] - v])
