@@ -43,10 +43,13 @@ def setScalars(h, s, v):
     minHSV = np.array([res[0] - h, res[1] - s, res[2] - v])
     maxHSV = np.array([res[0] + h, res[1] + s, res[2] + v])
 
-#create sliders
+#create trackbars
 cv2.createTrackbar("Hue Tol.", "HSV", 0, 255,nothing)
 cv2.createTrackbar("Sat Tol.", "HSV", 0, 255,nothing)
 cv2.createTrackbar("Val Tol.", "HSV", 0, 255,nothing)
+cv2.createTrackbar("1", "HSV", 0, 255,nothing)
+cv2.createTrackbar("2", "HSV", 0, 255,nothing)
+cv2.createTrackbar("3", "HSV", 0, 255,nothing)
 cv2.setMouseCallback("HSV", mouseCall, hsv)
 
 rval, frame = cap.read() #read in video
