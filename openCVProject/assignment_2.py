@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-#primary windows
+
 cap = cv2.VideoCapture(0)
 cv2.namedWindow("Original", cv2.WINDOW_KEEPRATIO)
 cv2.namedWindow("HSV", cv2.WINDOW_KEEPRATIO)
@@ -59,9 +59,9 @@ while True:
 
     val, img = cap.read() #read in video
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV) #convert to HSV
-    black_white = cv2.inRange(hsv, minHSV, maxHSV)    #black and white image to track stuff
-    img_erosion = cv2.erode(black_white, kernel, iterations=2)    #erode white
-    img_dilation = cv2.dilate(img_erosion, kernel, iterations=2) #dilate black
+    black_white = cv2.inRange(hsv, minHSV, maxHSV) #create black and white image
+    img_erode = cv2.erode(black_white, kernel, iterations=2) 
+    img_dilate = cv2.dilate(img_erode, kernel, iterations=2) 
 
     blur = cv2.GaussianBlur(img,(5,5),0)
     cv2.accumulateWeighted(blur, blank1, .320)
@@ -82,8 +82,8 @@ while True:
     cv2.imshow("Original", img)
     cv2.imshow("HSV", hsv)
     cv2.imshow("Black/White", black_white)
-    cv2.imshow('Erosion', img_erosion)
-    cv2.imshow('Dilation', img_dilation)
+    cv2.imshow('Erosion', img_erode)
+    cv2.imshow('Dilation', img_dilate)
     k = cv2.waitKey(1)
     if k == 27:
         break
