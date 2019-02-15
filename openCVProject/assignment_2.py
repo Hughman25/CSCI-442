@@ -22,7 +22,7 @@ cv2.moveWindow("Dilation", 300, 400)
 cv2.moveWindow("Video", 600, 400)
 cv2.moveWindow("Diff", 900, 400)
 
-#initialize variables so we can use 'em
+#initialize variables
 hsv = 0
 minHSV = np.array([0, 0, 0])
 maxHSV = np.array([0, 0, 0])
