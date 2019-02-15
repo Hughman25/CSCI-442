@@ -8,12 +8,16 @@ cv2.namedWindow("HSV", cv2.WINDOW_KEEPRATIO)
 cv2.namedWindow("Black/White", cv2.WINDOW_KEEPRATIO)
 cv2.namedWindow("Erosion", cv2.WINDOW_KEEPRATIO)
 cv2.namedWindow("Dilation", cv2.WINDOW_KEEPRATIO)
+cv2.namedWindow("Video", cv2.WINDOW_KEEPRATIO)
+cv2.namedWindow("Diff", cv2.WINDOW_KEEPRATIO)
 
 cv2.moveWindow("Original", 0, 0)
 cv2.moveWindow("HSV", 400, 0)
 cv2.moveWindow("Black/White", 800, 0)
-cv2.moveWindow("Erosion", 400, 400)
-cv2.moveWindow("Dilation", 800, 400)
+cv2.moveWindow("Erosion", 0, 400)
+cv2.moveWindow("Dilation", 300, 400)
+cv2.moveWindow("Video", 600, 400)
+cv2.moveWindow("Diff", 900, 400)
 
 #initialize variables so we can use 'em
 hsv = 0
@@ -49,7 +53,7 @@ rval, frame = cap.read() #read in video
 blank1 = np.float32(frame)
 blank2 = np.float32(frame)
 img = np.float32(frame)
-absDiff = np.float32(frame)
+diff = np.float32(frame)
 
 while True:
 
@@ -62,8 +66,8 @@ while True:
     blur = cv2.GaussianBlur(img,(5,5),0)
     cv2.accumulateWeighted(blur, blank1, .320)
     res1 = cv2.convertScaleAbs(blank1)
-    absDiff = cv2.absdiff(img, res1)
-    grayimg = cv2.cvtColor(absDiff, cv2.COLOR_BGR2GRAY)
+    diff = cv2.absdiff(img, res1)
+    grayimg = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
     _, grayimg = cv2.threshold(grayimg, 25, 255, cv2.THRESH_BINARY)
     grayimg = cv2.GaussianBlur(grayimg,(5,5),0)
     _, grayimg = cv2.threshold(grayimg, 220, 255, cv2.THRESH_BINARY)
@@ -71,7 +75,7 @@ while True:
 
     cv2.drawContours(frame, contours, -1, (0,255,0), 3)
     cv2.imshow("Video", frame)
-    cv2.imshow("Abs Diff", grayimg)
+    cv2.imshow("Diff", grayimg)
 
 
     #create images in windows
