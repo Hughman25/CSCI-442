@@ -1,3 +1,7 @@
+'''
+Authors: Matthew Sagen, Hugh Jackovich
+'''
+
 import cv2
 import numpy as np
 
