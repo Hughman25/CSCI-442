@@ -81,8 +81,7 @@ while True:
     _, gray = cv2.threshold(gray, 220, 255, cv2.THRESH_BINARY)
     contours, hier = cv2.findContours(gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
-    cv2.imshow("Video", frame)
+    cv2.drawContours(img, contours, -1, (0, 255, 0), 3)
     cv2.imshow("Diff", gray)
 
 
