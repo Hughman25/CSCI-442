@@ -80,9 +80,9 @@ while True:
     _, gray = cv2.threshold(gray, 25, 255, cv2.THRESH_BINARY)
     gray = cv2.GaussianBlur(gray,(5,5),0)
     _, gray = cv2.threshold(gray, 220, 255, cv2.THRESH_BINARY)
-    contours, hierarchy = cv2.findContours(gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hier = cv2.findContours(gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    cv2.drawContours(frame, contours, -1, (0,255,0), 3)
+    cv2.drawContours(frame, contours, -1, (0, 255, 0), 3)
     cv2.imshow("Video", frame)
     cv2.imshow("Diff", gray)
 
@@ -93,16 +93,16 @@ while True:
     cv2.imshow("Black/White", black_white)
     cv2.imshow('Erosion', erode)
     cv2.imshow('Dilation', dilate)
+
     k = cv2.waitKey(1)
     if k == 27:
         break
 
-    #get current positions of three trackbars
     h = cv2.getTrackbarPos('Hue', 'HSV')
     s = cv2.getTrackbarPos('Sat', 'HSV')
     v = cv2.getTrackbarPos('Val', 'HSV')
 
-    #update tracking scalars
+    #update scalars
     setScals(h, s, v)
 
 cv2.destroyAllWindows()
