@@ -5,8 +5,7 @@ Authors: Matthew Sagen, Hugh Jackovich
 import cv2
 import numpy as np
 
-
-cap = cv2.VideoCapture(0)
+#set up windows
 cv2.namedWindow("Original", cv2.WINDOW_KEEPRATIO)
 cv2.namedWindow("HSV", cv2.WINDOW_KEEPRATIO)
 cv2.namedWindow("Black/White", cv2.WINDOW_KEEPRATIO)
@@ -42,7 +41,7 @@ def onMouse(evt, x, y, flags, pic):
         print(res)
 
 #set scalar values for tracking every loop
-def setScalars(h, s, v):
+def setScals(h, s, v):
     global res, minHSV, maxHSV
     minHSV = np.array([res[0] - h, res[1] - s, res[2] - v])
     maxHSV = np.array([res[0] + h, res[1] + s, res[2] + v])
@@ -56,7 +55,10 @@ cv2.createTrackbar("2", "HSV", 0, 255,nothing)
 cv2.createTrackbar("3", "HSV", 0, 255,nothing)
 cv2.setMouseCallback("HSV", onMouse, hsv)
 
-rval, frame = cap.read() #read in video
+cap = cv2.VideoCapture(0)
+rval, frame = cap.read()
+
+#set up blank images
 blank1 = np.float32(frame)
 blank2 = np.float32(frame)
 img = np.float32(frame)
@@ -64,14 +66,14 @@ diff = np.float32(frame)
 
 while True:
 
-    val, img = cap.read() #read in video
+    val, img = cap.read()
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV) #convert to HSV
     black_white = cv2.inRange(hsv, minHSV, maxHSV) #create black and white image
     erode = cv2.erode(black_white, kernel, iterations=2) 
     dilate = cv2.dilate(erode, kernel, iterations=2) 
 
     blur = cv2.GaussianBlur(img,(5,5),0)
-    cv2.accumulateWeighted(blur, blank1, .320)
+    cv2.accumulateWeighted(blur, blank1, .4)
     res1 = cv2.convertScaleAbs(blank1)
     diff = cv2.absdiff(img, res1)
     gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
@@ -101,6 +103,6 @@ while True:
     v = cv2.getTrackbarPos('Val', 'HSV')
 
     #update tracking scalars
-    setScalars(h, s, v)
+    setScals(h, s, v)
 
 cv2.destroyAllWindows()
