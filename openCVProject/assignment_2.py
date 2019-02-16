@@ -6,21 +6,21 @@ import cv2
 import numpy as np
 
 #set up windows
-cv2.namedWindow("Original", cv2.WINDOW_KEEPRATIO)
+cv2.namedWindow("Original")
 cv2.namedWindow("HSV", cv2.WINDOW_KEEPRATIO)
 cv2.namedWindow("Black/White", cv2.WINDOW_KEEPRATIO)
 cv2.namedWindow("Erosion", cv2.WINDOW_KEEPRATIO)
 cv2.namedWindow("Dilation", cv2.WINDOW_KEEPRATIO)
-cv2.namedWindow("Video", cv2.WINDOW_KEEPRATIO)
-cv2.namedWindow("Diff", cv2.WINDOW_KEEPRATIO)
+cv2.namedWindow("Thresh", cv2.WINDOW_KEEPRATIO)
+cv2.namedWindow("Tours", cv2.WINDOW_KEEPRATIO)
 
 cv2.moveWindow("Original", 0, 0)
 cv2.moveWindow("HSV", 400, 0)
 cv2.moveWindow("Black/White", 800, 0)
 cv2.moveWindow("Erosion", 0, 400)
 cv2.moveWindow("Dilation", 300, 400)
-cv2.moveWindow("Video", 600, 400)
-cv2.moveWindow("Diff", 900, 400)
+cv2.moveWindow("Thresh", 600, 400)
+cv2.moveWindow("Tours", 900, 400)
 
 #initialize variables
 hsv = 0
@@ -71,7 +71,8 @@ rval, frame = cap.read()
 blank1 = np.float32(frame)
 blank2 = np.float32(frame)
 img = np.float32(frame)
-diff = np.float32(frame)
+tresh = np.float32(frame)
+tours = np.float32(frame)
 
 while True:
 
@@ -79,21 +80,22 @@ while True:
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV) #convert to HSV
     black_white = cv2.inRange(hsv, minHSV, maxHSV) #create black and white image
     erode = cv2.erode(black_white, kernel, iterations=2) 
-    dilate = cv2.dilate(erode, kernel, iterations=2) 
+    dilate = cv2.dilate(erode, kernel, iterations=2)
 
     blur = cv2.GaussianBlur(img,(5,5),0)
     cv2.accumulateWeighted(blur, blank1, .4)
     res1 = cv2.convertScaleAbs(blank1)
-    diff = cv2.absdiff(img, res1)
-    gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+    thresh = cv2.absdiff(img, res1)
+    thresh = cv2.cvtColor(thresh, cv2.COLOR_BGR2GRAY)
+    tours = cv2.absdiff(img, res1)
+    gray = cv2.cvtColor(tours, cv2.COLOR_BGR2GRAY)
     _, gray = cv2.threshold(gray, 25, 255, cv2.THRESH_BINARY)
     gray = cv2.GaussianBlur(gray,(5,5),0)
     _, gray = cv2.threshold(gray, 220, 255, cv2.THRESH_BINARY)
-    contours, hier = cv2.findContours(gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy, _ = cv2.findContours(gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours = np.array(contours).reshape((-1,1,2)).astype(np.int32)
 
     cv2.drawContours(img, contours, -1, (0, 255, 0), 3)
-    cv2.imshow("Diff", gray)
-
 
     #create images in windows
     cv2.imshow("Original", img)
@@ -101,6 +103,8 @@ while True:
     cv2.imshow("Black/White", black_white)
     cv2.imshow('Erosion', erode)
     cv2.imshow('Dilation', dilate)
+    cv2.imshow('Thresh', thresh)
+    cv2.imshow("Tours", gray)
 
     k = cv2.waitKey(1)
     if k == 27:
