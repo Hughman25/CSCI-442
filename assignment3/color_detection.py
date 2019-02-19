@@ -21,8 +21,8 @@ def main():
 
     picture_1 = cv2.imread("candy1.jpg", cv2.IMREAD_COLOR)
     picture_2 = cv2.imread('candy2.jpg', cv2.IMREAD_COLOR)
-    cv2.namedWindow("Candy")
-    cv2.namedWindow("Candy2")
+    cv2.namedWindow("Candy", cv2.WINDOW_KEEPRATIO)
+    cv2.namedWindow("Candy2", cv2.WINDOW_KEEPRATIO)
     cv2.moveWindow("Candy", 0, 0)
     cv2.moveWindow("Candy2", 600, 0)
     red = 0
