@@ -15,7 +15,6 @@ def updateText(pic, red, green, blue, yellow, orange, brown):
     yellow = "Yellow:" + str(yellow)
     orange = "Orange:" + str(orange)
     brown = "Brown:" + str(brown)
-    
     font = cv2.FONT_HERSHEY_SIMPLEX
     cv2.putText(pic, red, (10, 50), font, 1, (0, 0, 0), 2, cv2.LINE_AA)
     cv2.putText(pic, green, (10, 75), font, 1, (0, 0, 0), 2, cv2.LINE_AA)
@@ -50,22 +49,17 @@ def main():
     updateText(picture_2, red, green, blue, yellow, orange, brown)
     updateText(picture_3, red, green, blue, yellow, orange, brown)
     updateText(picture_4, red, green, blue, yellow, orange, brown)
-
-    #todo: find different colors in the image, determine if they are circles?
+    '''
+    todo: find different colors in the image, determine if they are circles? 
+    count how many of each color.
+    '''
 
 
     cv2.imshow("Candy1", picture_1)
     cv2.imshow("Candy2", picture_2)
     cv2.imshow("Candy3", picture_2)
     cv2.imshow("Candy4", picture_2)
-
-
-
     cv2.waitKey(0)
     cv2.destroyAllWindows()
-
-
-
-
 
 main()
