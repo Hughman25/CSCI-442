@@ -78,6 +78,9 @@ def main():
     todo: draw a circle object around a color if its whithin our threshold. Increment number of circle objects with same 
     color value. 
     '''
+    '''
+    maybe a method to mask for each color, and draw circles around each color...
+    '''
     # Threshold the HSV image to get only specified colors
     mask = cv2.inRange(hsv1, lower_blue, upper_blue) #yellow somehow
     
