@@ -52,9 +52,37 @@ def main():
     '''
     todo: find different colors in the image, determine if they are circles? 
     count how many of each color.
+    Need to track 6 different colors.
     '''
 
+    hsv1 = cv2.cvtColor(picture_1, cv2.COLOR_BGR2HSV) 
+    hsv2 = cv2.cvtColor(picture_2, cv2.COLOR_BGR2HSV)
+    hsv3 = cv2.cvtColor(picture_2, cv2.COLOR_BGR2HSV)
+    hsv4 = cv2.cvtColor(picture_2, cv2.COLOR_BGR2HSV)
 
+    lower_red = np.array([150, 0, 16]) #red
+    upper_red = np.array([197, 38, 56])
+
+    lower_blue = np.array([27, 139, 195]) #blue
+    upper_blue = np.array([77, 189, 245])
+
+    lower_green = np.array([29, 152, 65]) #green
+    upper_green = np.array([69, 192, 105])
+
+    lower_yel = np.array([235, 222, 0]) #yellow
+    upper_yel = np.array([255, 255, 20])
+
+    lower_or = np.array([222, 91, 14]) #orange
+    upper_or = np.array([262, 131, 54])
+
+    lower_br = np.array([76, 38, 32]) #brown
+    upper_br = np.array([116, 78, 72])
+
+    # Threshold the HSV image to get only specified colors
+    mask = cv2.inRange(hsv1, lower_blue, upper_blue) #yellow somehow
+    
+
+    cv2.imshow("Mask", mask)
     cv2.imshow("Candy1", picture_1)
     cv2.imshow("Candy2", picture_2)
     cv2.imshow("Candy3", picture_2)
