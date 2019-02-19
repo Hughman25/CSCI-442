@@ -92,7 +92,7 @@ while True:
     _, gray = cv2.threshold(gray, 25, 255, cv2.THRESH_BINARY)
     gray = cv2.GaussianBlur(gray,(5,5),0)
     _, gray = cv2.threshold(gray, 220, 255, cv2.THRESH_BINARY)
-    contours, hierarchy, _ = cv2.findContours(gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, hierarchy = cv2.findContours(gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     contours = np.array(contours).reshape((-1,1,2)).astype(np.int32)
 
     cv2.drawContours(img, contours, -1, (0, 255, 0), 3)
