@@ -49,11 +49,7 @@ def main():
     updateText(picture_2, red, green, blue, yellow, orange, brown)
     updateText(picture_3, red, green, blue, yellow, orange, brown)
     updateText(picture_4, red, green, blue, yellow, orange, brown)
-    '''
-    todo: find different colors in the image, determine if they are circles? 
-    count how many of each color.
-    Need to track 6 different colors.
-    '''
+
 
     hsv1 = cv2.cvtColor(picture_1, cv2.COLOR_BGR2HSV) 
     hsv2 = cv2.cvtColor(picture_2, cv2.COLOR_BGR2HSV)
@@ -78,6 +74,10 @@ def main():
     lower_br = np.array([76, 38, 32]) #brown
     upper_br = np.array([116, 78, 72])
 
+    '''
+    todo: draw a circle object around a color if its whithin our threshold. Increment number of circle objects with same 
+    color value. 
+    '''
     # Threshold the HSV image to get only specified colors
     mask = cv2.inRange(hsv1, lower_blue, upper_blue) #yellow somehow
     
