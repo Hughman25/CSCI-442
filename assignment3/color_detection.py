@@ -30,15 +30,15 @@ def main():
     picture_3 = cv2.imread("imagesWOvideo/three.jpg", cv2.IMREAD_COLOR)
     picture_4 = cv2.imread("imagesWOvideo/four.jpg", cv2.IMREAD_COLOR)
     #blur the images with 5x5
-    blur1 = cv2.blur(picture_1,(5,5))
-    blur2 = cv2.blur(picture_2,(5,5))
-    blur3 = cv2.blur(picture_3,(5,5))
-    blur4 = cv2.blur(picture_4,(5,5))
+    blur1 = cv2.blur(picture_1, (5, 5))
+    blur2 = cv2.blur(picture_2, (5, 5))
+    blur3 = cv2.blur(picture_3, (5, 5))
+    blur4 = cv2.blur(picture_4, (5, 5))
     #run canny edge detector to detect edges
-    edge1 = cv2.Canny(blur1,100,200)
-    edge2 = cv2.Canny(blur2,100,200)
-    edge3 = cv2.Canny(blur3,100,200)
-    edge4 = cv2.Canny(blur4,100,200)
+    edge1 = cv2.Canny(blur1, 50, 150)
+    edge2 = cv2.Canny(blur2, 50, 150)
+    edge3 = cv2.Canny(blur3, 50, 150)
+    edge4 = cv2.Canny(blur4, 50, 150)
     #create named windows
     cv2.namedWindow("Candy1", cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("Candy2", cv2.WINDOW_KEEPRATIO)
@@ -55,7 +55,7 @@ def main():
     cv2.moveWindow("Candy4", 0, 350)
     cv2.moveWindow("Edge1", 410, 350)
     cv2.moveWindow("Edge2", 820, 350)
-    cv2.moveWindow("Edge3", 0, 350)
+    cv2.moveWindow("Edge3", 900, 350)
     cv2.moveWindow("Edge4", 0, 350)
     #initialize r,g,b,y,o,br values
     red = 0
