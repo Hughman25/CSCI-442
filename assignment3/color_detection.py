@@ -29,17 +29,30 @@ def main():
     picture_2 = cv2.imread("imagesWOvideo/two.jpg", cv2.IMREAD_COLOR)
     picture_3 = cv2.imread("imagesWOvideo/three.jpg", cv2.IMREAD_COLOR)
     picture_4 = cv2.imread("imagesWOvideo/four.jpg", cv2.IMREAD_COLOR)
-
+    edge1 = cv2.Canny(picture_1,100,200)
+    edge2 = cv2.Canny(picture_2,100,200)
+    edge3 = cv2.Canny(picture_3,100,200)
+    edge4 = cv2.Canny(picture_4,100,200)
     cv2.namedWindow("Candy1", cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("Candy2", cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("Candy3", cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("Candy4", cv2.WINDOW_KEEPRATIO)
-    cv2.namedWindow("Mask", cv2.WINDOW_KEEPRATIO)
+    #cv2.namedWindow("Mask", cv2.WINDOW_KEEPRATIO)
+    cv2.namedWindow("Edge1", cv2.WINDOW_KEEPRATIO)
+    cv2.namedWindow("Edge2", cv2.WINDOW_KEEPRATIO)
+    cv2.namedWindow("Edge3", cv2.WINDOW_KEEPRATIO)
+    cv2.namedWindow("Edge4", cv2.WINDOW_KEEPRATIO)
+
     cv2.moveWindow("Candy1", 0, 0)
     cv2.moveWindow("Candy2", 410, 0)
     cv2.moveWindow("Candy3", 820, 0)
     cv2.moveWindow("Candy4", 0, 350)
-    cv2.moveWindow("Mask", 410, 350)
+    cv2.moveWindow("Edge1", 410, 350)
+    cv2.moveWindow("Edge2", 820, 350)
+    cv2.moveWindow("Edge3", 0, 350)
+    cv2.moveWindow("Edge4", 0, 350)
+
+    #cv2.moveWindow("Mask", 410, 350)
     red = 0
     green = 0
     blue = 0
@@ -87,11 +100,16 @@ def main():
     mask = cv2.inRange(hsv1, lower_br, upper_br) #yellow somehow
     
 
-    cv2.imshow("Mask", mask)
+    #cv2.imshow("Mask", mask)
     cv2.imshow("Candy1", picture_1)
     cv2.imshow("Candy2", picture_2)
-    cv2.imshow("Candy3", picture_2)
-    cv2.imshow("Candy4", picture_2)
+    cv2.imshow("Candy3", picture_3)
+    cv2.imshow("Candy4", picture_4)
+    cv2.imshow("Edge1", edge1)
+    cv2.imshow("Edge2", edge2)
+    cv2.imshow("Edge3", edge3)
+    cv2.imshow("Edge4", edge4)
+
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
