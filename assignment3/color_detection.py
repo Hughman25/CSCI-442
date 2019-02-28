@@ -30,26 +30,16 @@ def main():
     picture_3 = cv2.imread("imagesWOvideo/three.jpg", cv2.IMREAD_COLOR)
     picture_4 = cv2.imread("imagesWOvideo/four.jpg", cv2.IMREAD_COLOR)
     pictures = [picture_1, picture_2, picture_3, picture_4]
+
     #blur the images with 5x5
     blurs = []
     for i in range(len(pictures)):
-        blurs.append(cv2.blur(pictures[i], (5, 5)))
-    '''
-    blur1 = cv2.blur(picture_1, (5, 5))
-    blur2 = cv2.blur(picture_2, (5, 5))
-    blur3 = cv2.blur(picture_3, (5, 5))
-    blur4 = cv2.blur(picture_4, (5, 5))
-    '''
+        blurs.append(cv2.medianBlur(pictures[i], 5))
+
     edges = []
     #run canny edge detector to detect edges
     for i in range(len(blurs)):
-        edges.append(cv2.Canny(blurs[i], 50, 150))
-    '''
-    edge1 = cv2.Canny(blur1, 50, 150)
-    edge2 = cv2.Canny(blur2, 50, 150)
-    edge3 = cv2.Canny(blur3, 50, 150)
-    edge4 = cv2.Canny(blur4, 50, 150)
-    '''
+        edges.append(cv2.Canny(blurs[i], 200, 150))
     #create named windows
     cv2.namedWindow("Candy1", cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("Candy2", cv2.WINDOW_KEEPRATIO)
@@ -105,14 +95,10 @@ def main():
     lower_br = np.array([76, 38, 32]) #brown
     upper_br = np.array([116, 78, 72])
 
-    circle1 = cv2.HoughCircles(edges[0], cv2.HOUGH_GRADIENT,0.5,20,
-                              param1=15, param2=40, minRadius=0, maxRadius=0)
-    circle2 = cv2.HoughCircles(edges[1], cv2.HOUGH_GRADIENT,0.5,20,
-                              param1=15, param2=40,minRadius=0,maxRadius=0)
-    circle3 = cv2.HoughCircles(edges[2], cv2.HOUGH_GRADIENT,0.5,20,
-                              param1=15,param2=40,minRadius=0,maxRadius=0)
-    circle4 = cv2.HoughCircles(edges[3], cv2.HOUGH_GRADIENT,0.5,20,
-                              param1=15,param2=40,minRadius=0,maxRadius=0)
+    circle1 = cv2.HoughCircles(edges[0], cv2.HOUGH_GRADIENT, 1, 40, param1=15, param2=35, minRadius=10, maxRadius=0)
+    circle2 = cv2.HoughCircles(edges[1], cv2.HOUGH_GRADIENT, 1, 40, param1=15, param2=35, minRadius=10, maxRadius=0)
+    circle3 = cv2.HoughCircles(edges[2], cv2.HOUGH_GRADIENT, 1, 40, param1=15, param2=35, minRadius=10, maxRadius=0)
+    circle4 = cv2.HoughCircles(edges[3], cv2.HOUGH_GRADIENT, 1, 40, param1=15, param2=35, minRadius=10, maxRadius=0)
                               
     circles1 = np.uint16(np.around(circle1))
     circles2 = np.uint16(np.around(circle2))
@@ -120,23 +106,21 @@ def main():
     circles4 = np.uint16(np.around(circle4))
     for i in circles1[0, :]:
         # draw the outer circle
-        cv2.circle(edges[0], (i[0],i[1]), i[2] - 5, (255, 255, 255), -1)
+        cv2.circle(edges[0], (i[0], i[1]), i[2] - 5, (255, 255, 255), -1)
         # draw the center of the circle
         #cv2.circle(picture_1, (i[0], i[1]), 2,(0, 0, 255), 3)
 
     for i in circles2[0, :]:
         # draw the outer circle
-        cv2.circle(edges[1], (i[0], i[1]), i[2] - 2, (255, 255, 255), -1)
+        cv2.circle(edges[1], (i[0], i[1]), i[2] - 5, (255, 255, 255), -1)
 
     for i in circles3[0, :]:
         # draw the outer circle
-        cv2.circle(edges[2], (i[0], i[1]), i[2] - 2, (255, 255, 255), -1)
+        cv2.circle(edges[2], (i[0], i[1]), i[2] - 5, (255, 255, 255), -1)
 
     for i in circles4[0, :]:
         # draw the outer circle
-        cv2.circle(edges[3], (i[0], i[1]), i[2] - 2, (255, 255, 255), -1)
-
-    
+        cv2.circle(edges[3], (i[0], i[1]), i[2] - 5, (255, 255, 255), -1)
 
     #cv2.imshow("Mask", mask)
     cv2.imshow("Candy1", picture_1)
