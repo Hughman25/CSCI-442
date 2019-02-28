@@ -129,11 +129,12 @@ def main():
         cv2.circle(edges[3], (i[0], i[1]), i[2] - 5, (255, 255, 255), -1)
         #save the location of the circles
         circleLocations4.append((i[0],i[1]))
-        
-    #print out circle locations for first image
-    for i in range(len(circleLocations1)):
-        print(circleLocations1[i])
     
+    #use the locations to find original color in circle
+    for i in range(len(circleLocations1)):
+        rgb = picture_1[circleLocations1[i][1], circleLocations1[i][0]]
+        print(circleLocations1[i][1], circleLocations1[i][0], rgb[2], rgb[1], rgb[0])
+
     cv2.imshow("Candy1", picture_1)
     cv2.imshow("Candy2", picture_2)
     cv2.imshow("Candy3", picture_3)
