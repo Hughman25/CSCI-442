@@ -34,7 +34,7 @@ def main():
     #blur the images with 5x5
     blurs = []
     for i in range(len(pictures)):
-        blurs.append(cv2.medianBlur(pictures[i], 5))
+        blurs.append(cv2.GaussianBlur(pictures[i], (5, 5), 1))
 
     edges = []
     #run canny edge detector to detect edges
@@ -95,10 +95,10 @@ def main():
     lower_br = np.array([76, 38, 32]) #brown
     upper_br = np.array([116, 78, 72])
 
-    circle1 = cv2.HoughCircles(edges[0], cv2.HOUGH_GRADIENT, 1, 40, param1=15, param2=35, minRadius=10, maxRadius=0)
-    circle2 = cv2.HoughCircles(edges[1], cv2.HOUGH_GRADIENT, 1, 40, param1=15, param2=35, minRadius=10, maxRadius=0)
-    circle3 = cv2.HoughCircles(edges[2], cv2.HOUGH_GRADIENT, 1, 40, param1=15, param2=35, minRadius=10, maxRadius=0)
-    circle4 = cv2.HoughCircles(edges[3], cv2.HOUGH_GRADIENT, 1, 40, param1=15, param2=35, minRadius=10, maxRadius=0)
+    circle1 = cv2.HoughCircles(edges[0], cv2.HOUGH_GRADIENT, 1, 35, param1=1, param2=38, minRadius=8, maxRadius=0)
+    circle2 = cv2.HoughCircles(edges[1], cv2.HOUGH_GRADIENT, 1, 35, param1=1, param2=35, minRadius=8, maxRadius=0)
+    circle3 = cv2.HoughCircles(edges[2], cv2.HOUGH_GRADIENT, 1, 35, param1=1, param2=35, minRadius=8, maxRadius=0)
+    circle4 = cv2.HoughCircles(edges[3], cv2.HOUGH_GRADIENT, 1, 35, param1=1, param2=55, minRadius=8, maxRadius=0)
                               
     circles1 = np.uint16(np.around(circle1))
     circles2 = np.uint16(np.around(circle2))
