@@ -6,22 +6,29 @@ import cv2
 import numpy as np
 
 
-#helper method to get averages of surrounding pixels
-def getAverage(pic, x, y, red, green, blue):
-    red = int((pic[y][x][2] + pic[y+1][x][2] + 
-           pic[y-1][x][2] + pic[y][x+1][2] + 
-           pic[y][x-1][2] + pic[y+1][x+1][2] +
-           pic[y-1][x-1][2] + pic[y-1][x+1][2] + pic[y+1][x-1][2]) / 9)
-
-    green = int((pic[y][x][1] + pic[y+1][x][1] + 
-           pic[y-1][x][1] + pic[y][x+1][1] + 
-           pic[y][x-1][1] + pic[y+1][x+1][1] +
-           pic[y-1][x-1][1] + pic[y-1][x+1][1] + pic[y+1][x-1][1]) / 9)
-
-    blue = int((pic[y][x][0] + pic[y+1][x][0] + 
-           pic[y-1][x][0] + pic[y][x+1][0] + 
-           pic[y][x-1][0] + pic[y+1][x+1][0] +
-           pic[y-1][x-1][0] + pic[y-1][x+1][0] + pic[y+1][x-1][0]) / 9)
+#helper method to get averages of surrounding pixels 
+def getAverage(pic, x, y):
+    #compute average red value
+    '''
+    print(pic[y][x][2], pic[y+1][x][2],
+          pic[y-1][x][2], pic[y][x+1][2], 
+          pic[y][x-1][2], pic[y+1][x+1][2],
+          pic[y-1][x-1][2], pic[y-1][x+1][2], pic[y+1][x-1][2])
+    '''
+    red = int((int(pic[y][x][2]) + int(pic[y+1][x][2]) + 
+           int(pic[y-1][x][2]) + int(pic[y][x+1][2]) + 
+           int(pic[y][x-1][2]) + int(pic[y+1][x+1][2]) +
+           int(pic[y-1][x-1][2]) + int(pic[y-1][x+1][2]) + int(pic[y+1][x-1][2])) / 9)
+    #compute average green value
+    green = int((int(pic[y][x][1]) + int(pic[y+1][x][1])+ 
+           int(pic[y-1][x][1]) + int(pic[y][x+1][1]) + 
+           int(pic[y][x-1][1]) + int(pic[y+1][x+1][1]) +
+           int(pic[y-1][x-1][1]) + int(pic[y-1][x+1][1]) + int(pic[y+1][x-1][1])) / 9)
+    #compute average blue value
+    blue = int((int(pic[y][x][0]) + int(pic[y+1][x][0]) + 
+           int(pic[y-1][x][0]) + int(pic[y][x+1][0]) + 
+           int(pic[y][x-1][0]) + int(pic[y+1][x+1][0]) +
+           int(pic[y-1][x-1][0]) + int(pic[y-1][x+1][0]) + int(pic[y+1][x-1][0])) / 9)
     return red, green, blue
 
 #helper method to force colors within a threshold
@@ -52,7 +59,7 @@ def forceColor(red, green, blue):
         green = 58
         blue = 52
     #force orange
-    elif((red <= 255 and red >= 220) and (green <= 170 and green >= 90) and (blue >= 30 and blue <= 130)):
+    elif((red <= 255 and red >= 220) and (green <= 170 and green >= 90) and (blue >= 20 and blue <= 130)):
        red = 242 
        green = 111
        blue = 34
@@ -167,6 +174,7 @@ def main():
     circles2 = np.uint16(np.around(circle2))
     circles3 = np.uint16(np.around(circle3))
     circles4 = np.uint16(np.around(circle4))
+    #save the y,x locations of the center of a circle
     circleLocations1 = []
     circleLocations2 = []
     circleLocations3 = []
@@ -196,11 +204,11 @@ def main():
     #use the locations to find original color in circle
     for i in range(len(circleLocations1)):
         rgb = picture_1[circleLocations1[i][1], circleLocations1[i][0]]
-        red = int(rgb[2])
-        green = int(rgb[1])
-        blue = int(rgb[0])
+        #red = int(rgb[2])
+        #green = int(rgb[1])
+        #blue = int(rgb[0])
         #print(circleLocations1[i][1], circleLocations1[i][0], rgb[2], rgb[1], rgb[0])
-        red, green, blue = getAverage(picture_1, circleLocations1[i][1], circleLocations1[i][0], red, green, blue)
+        red, green, blue = getAverage(picture_1, circleLocations1[i][0], circleLocations1[i][1])
         print(red, green, blue)
         red, green, blue = forceColor(red, green, blue)
         cv2.circle(res1, (circleLocations1[i][0], circleLocations1[i][1]), 15, (blue, green, red), -1)
