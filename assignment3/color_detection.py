@@ -34,10 +34,12 @@ def main():
     cv2.namedWindow("Candy2", cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("Candy3", cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("Candy4", cv2.WINDOW_KEEPRATIO)
+    cv2.namedWindow("Mask", cv2.WINDOW_KEEPRATIO)
     cv2.moveWindow("Candy1", 0, 0)
     cv2.moveWindow("Candy2", 410, 0)
     cv2.moveWindow("Candy3", 820, 0)
     cv2.moveWindow("Candy4", 0, 350)
+    cv2.moveWindow("Mask", 410, 350)
     red = 0
     green = 0
     blue = 0
@@ -65,8 +67,8 @@ def main():
     lower_green = np.array([29, 152, 65]) #green
     upper_green = np.array([69, 192, 105])
 
-    lower_yel = np.array([235, 222, 0]) #yellow
-    upper_yel = np.array([255, 255, 20])
+    lower_yel = np.array([235, 235, 100]) #yellow
+    upper_yel = np.array([255, 255, 200])
 
     lower_or = np.array([222, 91, 14]) #orange
     upper_or = np.array([262, 131, 54])
@@ -82,7 +84,7 @@ def main():
     maybe a method to mask for each color, and draw circles around each color...
     '''
     # Threshold the HSV image to get only specified colors
-    mask = cv2.inRange(hsv1, lower_blue, upper_blue) #yellow somehow
+    mask = cv2.inRange(hsv1, lower_br, upper_br) #yellow somehow
     
 
     cv2.imshow("Mask", mask)
