@@ -24,25 +24,31 @@ def updateText(pic, red, green, blue, yellow, orange, brown):
     cv2.putText(pic, brown, (10, 175), font, 1, (0, 0, 0), 2, cv2.LINE_AA)
 
 def main():
-
+    #read the original images into memory
     picture_1 = cv2.imread("imagesWOvideo/one.jpg", cv2.IMREAD_COLOR)
     picture_2 = cv2.imread("imagesWOvideo/two.jpg", cv2.IMREAD_COLOR)
     picture_3 = cv2.imread("imagesWOvideo/three.jpg", cv2.IMREAD_COLOR)
     picture_4 = cv2.imread("imagesWOvideo/four.jpg", cv2.IMREAD_COLOR)
-    edge1 = cv2.Canny(picture_1,100,200)
-    edge2 = cv2.Canny(picture_2,100,200)
-    edge3 = cv2.Canny(picture_3,100,200)
-    edge4 = cv2.Canny(picture_4,100,200)
+    #blur the images with 5x5
+    blur1 = cv2.blur(picture_1,(5,5))
+    blur2 = cv2.blur(picture_2,(5,5))
+    blur3 = cv2.blur(picture_3,(5,5))
+    blur4 = cv2.blur(picture_4,(5,5))
+    #run canny edge detector to detect edges
+    edge1 = cv2.Canny(blur1,100,200)
+    edge2 = cv2.Canny(blur2,100,200)
+    edge3 = cv2.Canny(blur3,100,200)
+    edge4 = cv2.Canny(blur4,100,200)
+    #create named windows
     cv2.namedWindow("Candy1", cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("Candy2", cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("Candy3", cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("Candy4", cv2.WINDOW_KEEPRATIO)
-    #cv2.namedWindow("Mask", cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("Edge1", cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("Edge2", cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("Edge3", cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("Edge4", cv2.WINDOW_KEEPRATIO)
-
+    #move named windows 
     cv2.moveWindow("Candy1", 0, 0)
     cv2.moveWindow("Candy2", 410, 0)
     cv2.moveWindow("Candy3", 820, 0)
@@ -51,21 +57,20 @@ def main():
     cv2.moveWindow("Edge2", 820, 350)
     cv2.moveWindow("Edge3", 0, 350)
     cv2.moveWindow("Edge4", 0, 350)
-
-    #cv2.moveWindow("Mask", 410, 350)
+    #initialize r,g,b,y,o,br values
     red = 0
     green = 0
     blue = 0
     yellow = 0
     orange = 0
     brown = 0
-    #initialize counts to 0
+    #initialize counts to 0 and display on image
     updateText(picture_1, red, green, blue, yellow, orange, brown)
     updateText(picture_2, red, green, blue, yellow, orange, brown)
     updateText(picture_3, red, green, blue, yellow, orange, brown)
     updateText(picture_4, red, green, blue, yellow, orange, brown)
 
-
+    #get hsv values for images
     hsv1 = cv2.cvtColor(picture_1, cv2.COLOR_BGR2HSV) 
     hsv2 = cv2.cvtColor(picture_2, cv2.COLOR_BGR2HSV)
     hsv3 = cv2.cvtColor(picture_2, cv2.COLOR_BGR2HSV)
