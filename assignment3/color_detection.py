@@ -105,43 +105,38 @@ def main():
     lower_br = np.array([76, 38, 32]) #brown
     upper_br = np.array([116, 78, 72])
 
-    circle1 = cv2.HoughCircles(edges[0], cv2.HOUGH_GRADIENT,1,20,
-                              param1=30, param2=30, minRadius=0, maxRadius=0)
-    circle2 = cv2.HoughCircles(edges[1], cv2.HOUGH_GRADIENT,1,20,
-                              param1=30, param2=30,minRadius=0,maxRadius=0)
-    circle3 = cv2.HoughCircles(edges[2], cv2.HOUGH_GRADIENT,1,20,
-                              param1=30,param2=30,minRadius=0,maxRadius=0)
-    circle4 = cv2.HoughCircles(edges[3], cv2.HOUGH_GRADIENT,1,20,
-                              param1=30,param2=30,minRadius=0,maxRadius=0)
+    circle1 = cv2.HoughCircles(edges[0], cv2.HOUGH_GRADIENT,0.5,20,
+                              param1=15, param2=40, minRadius=0, maxRadius=0)
+    circle2 = cv2.HoughCircles(edges[1], cv2.HOUGH_GRADIENT,0.5,20,
+                              param1=15, param2=40,minRadius=0,maxRadius=0)
+    circle3 = cv2.HoughCircles(edges[2], cv2.HOUGH_GRADIENT,0.5,20,
+                              param1=15,param2=40,minRadius=0,maxRadius=0)
+    circle4 = cv2.HoughCircles(edges[3], cv2.HOUGH_GRADIENT,0.5,20,
+                              param1=15,param2=40,minRadius=0,maxRadius=0)
                               
     circles1 = np.uint16(np.around(circle1))
     circles2 = np.uint16(np.around(circle2))
     circles3 = np.uint16(np.around(circle3))
     circles4 = np.uint16(np.around(circle4))
-    for i in circles1[0,:]:
+    for i in circles1[0, :]:
         # draw the outer circle
-        cv2.circle(picture_1, (i[0],i[1]), i[2], (0, 255 ,0), 2)
+        cv2.circle(edges[0], (i[0],i[1]), i[2] - 5, (255, 255 , 255), -1)
         # draw the center of the circle
-        cv2.circle(picture_1, (i[0], i[1]), 2,(0, 0, 255), 3)
+        #cv2.circle(picture_1, (i[0], i[1]), 2,(0, 0, 255), 3)
 
-    for i in circles2[0,:]:
+    for i in circles2[0, :]:
         # draw the outer circle
-        cv2.circle(picture_2, (i[0], i[1]), i[2], (0, 255, 0), 2)
-        # draw the center of the circle
-        cv2.circle(picture_2, (i[0], i[1]), 2, (0, 0, 255), 3)
+        cv2.circle(edges[1], (i[0], i[1]), i[2] - 5, (255, 255, 255), -1)
 
-    for i in circles3[0,:]:
+    for i in circles3[0, :]:
         # draw the outer circle
-        cv2.circle(picture_3, (i[0], i[1]), i[2], (0, 255, 0), 2)
-        # draw the center of the circle
-        cv2.circle(picture_3, (i[0], i[1]), 2, (0, 0, 255), 3)
+        cv2.circle(edges[2], (i[0], i[1]), i[2] - 5, (255, 255, 255), -1)
 
-    for i in circles4[0,:]:
+    for i in circles4[0, :]:
         # draw the outer circle
-        cv2.circle(picture_4,(i[0],i[1]),i[2],(0,255,0),2)
-        # draw the center of the circle
-        cv2.circle(picture_4,(i[0],i[1]),2,(0,0,255),3)
+        cv2.circle(edges[3], (i[0], i[1]), i[2] - 5, (255, 255, 255), -1)
 
+    
 
     #cv2.imshow("Mask", mask)
     cv2.imshow("Candy1", picture_1)
