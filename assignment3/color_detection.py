@@ -9,12 +9,6 @@ import numpy as np
 #helper method to get averages of surrounding pixels 
 def getAverage(pic, x, y):
     #compute average red value
-    '''
-    print(pic[y][x][2], pic[y+1][x][2],
-          pic[y-1][x][2], pic[y][x+1][2], 
-          pic[y][x-1][2], pic[y+1][x+1][2],
-          pic[y-1][x-1][2], pic[y-1][x+1][2], pic[y+1][x-1][2])
-    '''
     red = int((int(pic[y][x][2]) + int(pic[y+1][x][2]) + 
            int(pic[y-1][x][2]) + int(pic[y][x+1][2]) + 
            int(pic[y][x-1][2]) + int(pic[y+1][x+1][2]) +
@@ -34,7 +28,7 @@ def getAverage(pic, x, y):
 #helper method to force colors within a threshold
 def forceColor(red, green, blue):
     #force green
-    if((red >= 0 and red <= 4) and (green >= 245 and green <= 246) and (blue <= 33 and blue >= 2)):
+    if((red >= 0 and red <= 7) and (green >= 200 and green <= 255) and (blue <= 155 and blue >= 100)):
         red = 49
         green = 172
         blue = 85
@@ -44,12 +38,12 @@ def forceColor(red, green, blue):
         green = 18
         blue = 36
     #force blue
-    elif((red <= 10 and red >= 0) and (green <= 120 and green >= 85) and (blue <= 255 and blue >= 245)):
+    elif((red <= 10 and red >= 0) and (green <= 215 and green >= 140) and (blue <= 255 and blue >= 240)):
         red = 47
         green = 159
         blue = 215
     #force yellow
-    elif((red <= 255 and red >= 245) and (green >= 245 and green <= 255) and (blue >= 0 and blue <= 90)):
+    elif((red <= 255 and red >= 230) and (green >= 220 and green <= 255) and (blue >= 10 and blue <= 120)):
         red = 255
         green = 242
         blue = 0
@@ -59,7 +53,7 @@ def forceColor(red, green, blue):
         green = 58
         blue = 52
     #force orange
-    elif((red <= 255 and red >= 220) and (green <= 170 and green >= 90) and (blue >= 20 and blue <= 130)):
+    elif((red <= 255 and red >= 230) and (green <= 190 and green >= 100) and (blue >= 20 and blue <= 155)):
        red = 242 
        green = 111
        blue = 34
