@@ -120,21 +120,21 @@ def main():
     circles4 = np.uint16(np.around(circle4))
     for i in circles1[0, :]:
         # draw the outer circle
-        cv2.circle(edges[0], (i[0],i[1]), i[2] - 5, (255, 255 , 255), -1)
+        cv2.circle(edges[0], (i[0],i[1]), i[2] - 5, (255, 255, 255), -1)
         # draw the center of the circle
         #cv2.circle(picture_1, (i[0], i[1]), 2,(0, 0, 255), 3)
 
     for i in circles2[0, :]:
         # draw the outer circle
-        cv2.circle(edges[1], (i[0], i[1]), i[2] - 5, (255, 255, 255), -1)
+        cv2.circle(edges[1], (i[0], i[1]), i[2] - 2, (255, 255, 255), -1)
 
     for i in circles3[0, :]:
         # draw the outer circle
-        cv2.circle(edges[2], (i[0], i[1]), i[2] - 5, (255, 255, 255), -1)
+        cv2.circle(edges[2], (i[0], i[1]), i[2] - 2, (255, 255, 255), -1)
 
     for i in circles4[0, :]:
         # draw the outer circle
-        cv2.circle(edges[3], (i[0], i[1]), i[2] - 5, (255, 255, 255), -1)
+        cv2.circle(edges[3], (i[0], i[1]), i[2] - 2, (255, 255, 255), -1)
 
     
 
