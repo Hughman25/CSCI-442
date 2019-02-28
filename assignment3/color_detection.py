@@ -5,6 +5,25 @@ Authors: Matthew Sagen and Hugh Jackovich
 import cv2
 import numpy as np
 
+
+#helper method to get averages of surrounding pixels
+def getAverage(pic, x, y, red, green, blue):
+    red = int((pic[y][x][2] + pic[y+1][x][2] + 
+           pic[y-1][x][2] + pic[y][x+1][2] + 
+           pic[y][x-1][2] + pic[y+1][x+1][2] +
+           pic[y-1][x-1][2] + pic[y-1][x+1][2] + pic[y+1][x-1][2]) / 9)
+
+    green = int((pic[y][x][1] + pic[y+1][x][1] + 
+           pic[y-1][x][1] + pic[y][x+1][1] + 
+           pic[y][x-1][1] + pic[y+1][x+1][1] +
+           pic[y-1][x-1][1] + pic[y-1][x+1][1] + pic[y+1][x-1][1]) / 9)
+
+    blue = int((pic[y][x][0] + pic[y+1][x][0] + 
+           pic[y-1][x][0] + pic[y][x+1][0] + 
+           pic[y][x-1][0] + pic[y+1][x+1][0] +
+           pic[y-1][x-1][0] + pic[y-1][x+1][0] + pic[y+1][x-1][0]) / 9)
+    return red, green, blue
+
 #helper method to force colors within a threshold
 def forceColor(red, green, blue):
     #force green
@@ -180,7 +199,9 @@ def main():
         red = int(rgb[2])
         green = int(rgb[1])
         blue = int(rgb[0])
-        print(circleLocations1[i][1], circleLocations1[i][0], rgb[2], rgb[1], rgb[0])
+        #print(circleLocations1[i][1], circleLocations1[i][0], rgb[2], rgb[1], rgb[0])
+        red, green, blue = getAverage(picture_1, circleLocations1[i][1], circleLocations1[i][0], red, green, blue)
+        print(red, green, blue)
         red, green, blue = forceColor(red, green, blue)
         cv2.circle(res1, (circleLocations1[i][0], circleLocations1[i][1]), 15, (blue, green, red), -1)
 
