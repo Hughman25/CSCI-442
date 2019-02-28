@@ -94,16 +94,17 @@ def main():
     lower_br = np.array([76, 38, 32]) #brown
     upper_br = np.array([116, 78, 72])
 
-    '''
-    todo: draw a circle object around a color if its whithin our threshold. Increment number of circle objects with same 
-    color value. 
-    '''
-    '''
-    maybe a method to mask for each color, and draw circles around each color...
-    '''
-    # Threshold the HSV image to get only specified colors
-    mask = cv2.inRange(hsv1, lower_br, upper_br) #yellow somehow
-    
+    circles = cv2.HoughCircles(edge1, cv2.HOUGH_GRADIENT, 1, 20,
+                            param1=50, param2=30, minRadius=0, maxRadius=0)
+
+    circles = np.uint16(np.around(circles))
+    for i in circles[0,:]:
+        # draw the outer circle
+        cv2.circle(picture_1, (i[0], i[1]), i[2],( 0, 255, 0), 2)
+        # draw the center of the circle
+        cv2.circle(picture_1, (i[0], i[1]), 2, (0, 0, 255), 3)
+
+    cv2.imshow('detected circles', picture_1)
 
     #cv2.imshow("Mask", mask)
     cv2.imshow("Candy1", picture_1)
