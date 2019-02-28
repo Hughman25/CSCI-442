@@ -7,7 +7,43 @@ import numpy as np
 
 #helper method to force colors within a threshold
 def forceColor(red, green, blue):
-    pass
+    #force green
+    if((red >= 0 and red <= 4) and (green >= 245 and green <= 246) and (blue <= 33 and blue >= 2)):
+        red = 49
+        green = 172
+        blue = 85
+    #force red
+    elif((red <= 255 and red >= 200) and (green <= 95 and green >= 65) and (blue <= 120 and blue >= 80)):
+        red = 177
+        green = 18
+        blue = 36
+    #force blue
+    elif((red <= 10 and red >= 0) and (green <= 120 and green >= 85) and (blue <= 255 and blue >= 245)):
+        red = 47
+        green = 159
+        blue = 215
+    #force yellow
+    elif((red <= 255 and red >= 245) and (green >= 245 and green <= 255) and (blue >= 0 and blue <= 90)):
+        red = 255
+        green = 242
+        blue = 0
+    #force brown
+    elif((red >= 20 and red <= 110) and (green >= 20 and green <= 130) and (blue >=30 and blue <= 130)):
+        red = 96
+        green = 58
+        blue = 52
+    #force orange
+    elif((red <= 255 and red >= 220) and (green <= 170 and green >= 90) and (blue >= 30 and blue <= 130)):
+       red = 242 
+       green = 111
+       blue = 34
+    #if we miss the range keep it white
+    else:
+        red = 255
+        green = 255
+        blue = 255
+    return red, green, blue
+
 #helper method to update text in windows.
 def updateText(pic, red, green, blue, yellow, orange, brown):
     red = "Red:" + str(red)
@@ -145,7 +181,7 @@ def main():
         green = int(rgb[1])
         blue = int(rgb[0])
         print(circleLocations1[i][1], circleLocations1[i][0], rgb[2], rgb[1], rgb[0])
-        forceColor(red, green, blue)
+        red, green, blue = forceColor(red, green, blue)
         cv2.circle(res1, (circleLocations1[i][0], circleLocations1[i][1]), 15, (blue, green, red), -1)
 
     cv2.imshow("Candy1", picture_1)
