@@ -104,25 +104,36 @@ def main():
     circles2 = np.uint16(np.around(circle2))
     circles3 = np.uint16(np.around(circle3))
     circles4 = np.uint16(np.around(circle4))
+    circleLocations1 = []
+    circleLocations2 = []
+    circleLocations3 = []
+    circleLocations4 = []
     for i in circles1[0, :]:
         # draw the outer circle
         cv2.circle(edges[0], (i[0], i[1]), i[2] - 5, (255, 255, 255), -1)
-        # draw the center of the circle
-        #cv2.circle(picture_1, (i[0], i[1]), 2,(0, 0, 255), 3)
+        #save the location of the circles
+        circleLocations1.append((i[0],i[1]))
 
     for i in circles2[0, :]:
         # draw the outer circle
         cv2.circle(edges[1], (i[0], i[1]), i[2] - 5, (255, 255, 255), -1)
-
+        #save the location of the circles
+        circleLocations2.append((i[0],i[1]))
     for i in circles3[0, :]:
         # draw the outer circle
         cv2.circle(edges[2], (i[0], i[1]), i[2] - 5, (255, 255, 255), -1)
-
+        #save the location of the circles
+        circleLocations3.append((i[0],i[1]))
     for i in circles4[0, :]:
         # draw the outer circle
         cv2.circle(edges[3], (i[0], i[1]), i[2] - 5, (255, 255, 255), -1)
-
-    #cv2.imshow("Mask", mask)
+        #save the location of the circles
+        circleLocations4.append((i[0],i[1]))
+        
+    #print out circle locations for first image
+    for i in range(len(circleLocations1)):
+        print(circleLocations1[i])
+    
     cv2.imshow("Candy1", picture_1)
     cv2.imshow("Candy2", picture_2)
     cv2.imshow("Candy3", picture_3)
