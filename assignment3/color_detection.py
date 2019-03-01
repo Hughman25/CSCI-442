@@ -195,7 +195,7 @@ def main():
     num_orange = 0
     num_brown = 0
     color = ""
-    for i in range(len(circleLocations1)/2):
+    for i in range(len(circleLocations1)):
         rgb = picture_1[circleLocations1[i][1], circleLocations1[i][0]]
         red, green, blue = getAverage(picture_1, circleLocations1[i][0], circleLocations1[i][1])
         red, green, blue, color = forceColor(red, green, blue)
@@ -213,7 +213,6 @@ def main():
         elif(color == "brown"):
             num_brown += 1
     updateText(picture_1, num_red, num_green, num_blue, num_yellow, num_orange, num_brown)
-    print(num_yellow)
     num_red = 0
     num_green = 0
     num_blue = 0
