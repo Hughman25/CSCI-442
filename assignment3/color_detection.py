@@ -303,7 +303,7 @@ def main():
     cv2.imshow("Res4", res4)
 
 
-
+    #import video file
     cap = cv2.VideoCapture('MandMVideoSmall.mp4')
 
     while(True):
@@ -317,7 +317,13 @@ def main():
         blur = cv2.GaussianBlur(vid, (5, 5), 1)
         edge = cv2.Canny(blur, 200, 150)
         #find circles in frame
-        circles = cv2.HoughCircles(edge, cv2.HOUGH_GRADIENT, 1, 30, param1=1, param2=30, minRadius=5, maxRadius=0)
+        circles = cv2.HoughCircles(edge, cv2.HOUGH_GRADIENT, 1, 35, param1=1, param2=35, minRadius=0, maxRadius=0)
+        num_red = 0
+        num_green = 0
+        num_blue = 0
+        num_yellow = 0
+        num_orange = 0
+        num_brown = 0
         if(circles is not None):
             circles1 = np.uint16(np.around(circles))
             circleLocations = []
@@ -331,7 +337,6 @@ def main():
                 rgb = vid[circleLocations[i][1], circleLocations[i][0]]
                 red, green, blue = getAverage(vid, circleLocations[i][0], circleLocations[i][1])
                 red, green, blue, color = forceColor(red, green, blue)
-                #cv2.circle(res1, (circleLocations1[i][0], circleLocations1[i][1]), 15, (blue, green, red), -1)
                 if(color == "red"):
                     num_red += 1
                 elif(color == "green"):
@@ -344,7 +349,7 @@ def main():
                     num_orange += 1
                 elif(color == "brown"):
                     num_brown += 1
-            updateText(vid, num_red, num_green, num_blue, num_yellow, num_orange, num_brown)
+        updateText(vid, num_red, num_green, num_blue, num_yellow, num_orange, num_brown)
         cv2.imshow('Video', vid)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
