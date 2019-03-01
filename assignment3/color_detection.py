@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 
 
+
 #helper method to get averages of surrounding pixels 
 def getAverage(pic, x, y):
     #compute average red value
@@ -28,44 +29,52 @@ def getAverage(pic, x, y):
 #helper method to force colors within a threshold
 def forceColor(red, green, blue):
     #force green
+    color = "white"
     if((red >= 0 and red <= 7) and (green >= 200 and green <= 255) and (blue <= 155 and blue >= 100)):
         red = 49
         green = 172
         blue = 85
+        color = "green"
     #force red
     elif((red <= 255 and red >= 200) and (green <= 95 and green >= 65) and (blue <= 120 and blue >= 80)):
         red = 177
         green = 18
         blue = 36
+        color = "red"
     #force blue
     elif((red <= 10 and red >= 0) and (green <= 215 and green >= 140) and (blue <= 255 and blue >= 240)):
         red = 47
         green = 159
         blue = 215
+        color = "blue"
     #force yellow
     elif((red <= 255 and red >= 230) and (green >= 220 and green <= 255) and (blue >= 10 and blue <= 120)):
         red = 255
         green = 242
         blue = 0
+        color = "yellow"
     #force brown
-    elif((red >= 20 and red <= 110) and (green >= 20 and green <= 130) and (blue >=30 and blue <= 130)):
+    elif((red >= 80 and red <= 140) and (green >= 100 and green <= 185) and (blue >= 150 and blue <= 140)):
         red = 96
         green = 58
         blue = 52
+        color = "brown"
     #force orange
     elif((red <= 255 and red >= 230) and (green <= 190 and green >= 100) and (blue >= 20 and blue <= 155)):
        red = 242 
        green = 111
        blue = 34
+       color = "orange"
     #if we miss the range keep it white
     else:
         red = 255
         green = 255
         blue = 255
-    return red, green, blue
+    return red, green, blue, color
 
 #helper method to update text in windows.
 def updateText(pic, red, green, blue, yellow, orange, brown):
+    
     red = "Red:" + str(red)
     green = "Green:" + str(green)
     blue = "Blue:" + str(blue)
@@ -90,9 +99,22 @@ def main():
     #res1 = picture_1.copy()
     width = 600
     height = 800
-    res1= np.zeros((height,width,3), np.uint8)
-    res1[:,0:width//2] = (0,0,0)      # (B, G, R)
-    res1[:,width//2:width] = (0,0,0)
+    #initialize black frames for force color
+    res1 = np.zeros((height, width, 3), np.uint8)
+    res1[:, 0:width//2] = (0, 0, 0)      # (B, G, R)
+    res1[:, width//2:width] = (0, 0, 0)
+
+    res2 = np.zeros((height, width, 3), np.uint8)
+    res2[:, 0:width//2] = (0, 0, 0)      # (B, G, R)
+    res2[:, width//2:width] = (0, 0, 0)
+
+    res3 = np.zeros((height, width, 3), np.uint8)
+    res3[:, 0:width//2] = (0, 0, 0)      # (B, G, R)
+    res3[:, width//2:width] = (0, 0, 0)
+
+    res4 = np.zeros((height,width,3), np.uint8)
+    res4[:, 0:width//2] = (0, 0, 0)      # (B, G, R)
+    res4[:, width//2:width] = (0, 0, 0)
     #blur the images with 5x5
     blurs = []
     for i in range(len(pictures)):
@@ -112,6 +134,9 @@ def main():
     cv2.namedWindow("Edge3", cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("Edge4", cv2.WINDOW_KEEPRATIO)
     cv2.namedWindow("Res1", cv2.WINDOW_KEEPRATIO)
+    cv2.namedWindow("Res2", cv2.WINDOW_KEEPRATIO)
+    cv2.namedWindow("Res3", cv2.WINDOW_KEEPRATIO)
+    cv2.namedWindow("Res4", cv2.WINDOW_KEEPRATIO)
 
     #move named windows 
     cv2.moveWindow("Candy1", 0, 0)
@@ -123,41 +148,7 @@ def main():
     cv2.moveWindow("Edge3", 900, 350)
     cv2.moveWindow("Edge4", 0, 350)
     #initialize r,g,b,y,o,br values
-    red = 0
-    green = 0
-    blue = 0
-    yellow = 0
-    orange = 0
-    brown = 0
-    #initialize counts to 0 and display on image
-    updateText(picture_1, red, green, blue, yellow, orange, brown)
-    updateText(picture_2, red, green, blue, yellow, orange, brown)
-    updateText(picture_3, red, green, blue, yellow, orange, brown)
-    updateText(picture_4, red, green, blue, yellow, orange, brown)
 
-    #get hsv values for images
-    hsv1 = cv2.cvtColor(picture_1, cv2.COLOR_BGR2HSV) 
-    hsv2 = cv2.cvtColor(picture_2, cv2.COLOR_BGR2HSV)
-    hsv3 = cv2.cvtColor(picture_2, cv2.COLOR_BGR2HSV)
-    hsv4 = cv2.cvtColor(picture_2, cv2.COLOR_BGR2HSV)
-
-    lower_red = np.array([150, 0, 16]) #red
-    upper_red = np.array([197, 38, 56])
-
-    lower_blue = np.array([27, 139, 195]) #blue
-    upper_blue = np.array([77, 189, 245])
-
-    lower_green = np.array([29, 152, 65]) #green
-    upper_green = np.array([69, 192, 105])
-
-    lower_yel = np.array([235, 235, 100]) #yellow
-    upper_yel = np.array([255, 255, 200])
-
-    lower_or = np.array([222, 91, 14]) #orange
-    upper_or = np.array([262, 131, 54])
-
-    lower_br = np.array([76, 38, 32]) #brown
-    upper_br = np.array([116, 78, 72])
 
     circle1 = cv2.HoughCircles(edges[0], cv2.HOUGH_GRADIENT, 1, 35, param1=1, param2=38, minRadius=8, maxRadius=0)
     circle2 = cv2.HoughCircles(edges[1], cv2.HOUGH_GRADIENT, 1, 35, param1=1, param2=35, minRadius=8, maxRadius=0)
@@ -197,25 +188,115 @@ def main():
     
     #use the locations to find original color in circle
     for i in range(len(circleLocations1)):
+        red = 0
+        green = 0
+        blue = 0
+        yellow = 0
+        orange = 0
+        brown = 0
         rgb = picture_1[circleLocations1[i][1], circleLocations1[i][0]]
-        #red = int(rgb[2])
-        #green = int(rgb[1])
-        #blue = int(rgb[0])
-        #print(circleLocations1[i][1], circleLocations1[i][0], rgb[2], rgb[1], rgb[0])
         red, green, blue = getAverage(picture_1, circleLocations1[i][0], circleLocations1[i][1])
-        print(red, green, blue)
-        red, green, blue = forceColor(red, green, blue)
+        red, green, blue, color = forceColor(red, green, blue)
         cv2.circle(res1, (circleLocations1[i][0], circleLocations1[i][1]), 15, (blue, green, red), -1)
+        if(color == "red"):
+            red += 1
+        elif (color == "green"):
+            green += 1
+        elif (color == "blue"):
+            blue += 1
+        elif (color == "yellow"):
+            yellow += 1
+        elif (color == "orange"):
+            orange += 1
+        elif (color == "brown"):
+            brown += 1
+    updateText(picture_1, red, green, blue, yellow, orange, brown)
+        
+    for i in range(len(circleLocations2)):
+        red = 0
+        green = 0
+        blue = 0
+        yellow = 0
+        orange = 0
+        brown = 0
+        rgb = picture_2[circleLocations2[i][1], circleLocations2[i][0]]
+        red, green, blue = getAverage(picture_2, circleLocations2[i][0], circleLocations2[i][1])
+        red, green, blue, color = forceColor(red, green, blue)
+        cv2.circle(res2, (circleLocations2[i][0], circleLocations2[i][1]), 15, (blue, green, red), -1)
+        if(color == "red"):
+            red += 1
+        elif (color == "green"):
+            green += 1
+        elif (color == "blue"):
+            blue += 1
+        elif (color == "yellow"):
+            yellow += 1
+        elif (color == "orange"):
+            orange += 1
+        elif (color == "brown"):
+            brown += 1
+    updateText(picture_2, red, green, blue, yellow, orange, brown)
+    for i in range(len(circleLocations3)):
+        red = 0
+        green = 0
+        blue = 0
+        yellow = 0
+        orange = 0
+        brown = 0
+        rgb = picture_3[circleLocations3[i][1], circleLocations3[i][0]]
+        red, green, blue = getAverage(picture_3, circleLocations3[i][0], circleLocations3[i][1])
+        red, green, blue, color = forceColor(red, green, blue)
+        cv2.circle(res3, (circleLocations3[i][0], circleLocations3[i][1]), 15, (blue, green, red), -1)
+        if(color == "red"):
+            red += 1
+        elif (color == "green"):
+            green += 1
+        elif (color == "blue"):
+            blue += 1
+        elif (color == "yellow"):
+            yellow += 1
+        elif (color == "orange"):
+            orange += 1
+        elif (color == "brown"):
+            brown += 1
+    updateText(picture_3, red, green, blue, yellow, orange, brown)
+    for i in range(len(circleLocations4)):
+        red = 0
+        green = 0
+        blue = 0
+        yellow = 0
+        orange = 0
+        brown = 0
+        rgb = picture_4[circleLocations4[i][1], circleLocations4[i][0]]
+        red, green, blue = getAverage(picture_4, circleLocations4[i][0], circleLocations4[i][1])
+        red, green, blue, color = forceColor(red, green, blue)
+        cv2.circle(res4, (circleLocations4[i][0], circleLocations4[i][1]), 15, (blue, green, red), -1)
+        if(color == "red"):
+            red += 1
+        elif (color == "green"):
+            green += 1
+        elif (color == "blue"):
+            blue += 1
+        elif (color == "yellow"):
+            yellow += 1
+        elif (color == "orange"):
+            orange += 1
+        elif (color == "brown"):
+            brown += 1
+    updateText(picture_4, red, green, blue, yellow, orange, brown)
 
     cv2.imshow("Candy1", picture_1)
     cv2.imshow("Candy2", picture_2)
     cv2.imshow("Candy3", picture_3)
     cv2.imshow("Candy4", picture_4)
-    cv2.imshow("Res1", res1)
     cv2.imshow("Edge1", edges[0])
     cv2.imshow("Edge2", edges[1])
     cv2.imshow("Edge3", edges[2])
     cv2.imshow("Edge4", edges[3])
+    cv2.imshow("Res1", res1)
+    cv2.imshow("Res2", res2)
+    cv2.imshow("Res3", res3)
+    cv2.imshow("Res4", res4)
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
