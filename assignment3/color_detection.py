@@ -30,37 +30,37 @@ def getAverage(pic, x, y):
 def forceColor(red, green, blue):
     #force green
     color = "white"
-    if((red >= 0 and red <= 7) and (green >= 200 and green <= 255) and (blue <= 155 and blue >= 100)):
+    if((red >= 0 and red <= 45) and (green >= 170 and green <= 255) and (blue <= 195 and blue >= 70)):
         red = 49
         green = 172
         blue = 85
         color = "green"
     #force red
-    elif((red <= 255 and red >= 200) and (green <= 95 and green >= 65) and (blue <= 120 and blue >= 80)):
+    elif((red <= 255 and red >= 170) and (green <= 140 and green >= 45) and (blue <= 180 and blue >= 60)):
         red = 177
         green = 18
         blue = 36
         color = "red"
     #force blue
-    elif((red <= 10 and red >= 0) and (green <= 215 and green >= 140) and (blue <= 255 and blue >= 240)):
+    elif((red <= 35 and red >= 0) and (green <= 235 and green >= 120) and (blue <= 255 and blue >= 220)):
         red = 47
         green = 159
         blue = 215
         color = "blue"
     #force yellow
-    elif((red <= 255 and red >= 230) and (green >= 220 and green <= 255) and (blue >= 10 and blue <= 120)):
+    elif((red <= 255 and red >= 200) and (green >= 200 and green <= 255) and (blue >= 0 and blue <= 170)):
         red = 255
         green = 242
         blue = 0
         color = "yellow"
     #force brown
-    elif((red >= 80 and red <= 140) and (green >= 100 and green <= 185) and (blue >= 150 and blue <= 140)):
+    elif((red >= 60 and red <= 160) and (green >= 70 and green <= 200) and (blue <= 200 and blue >= 70)):
         red = 96
         green = 58
         blue = 52
         color = "brown"
     #force orange
-    elif((red <= 255 and red >= 230) and (green <= 190 and green >= 100) and (blue >= 20 and blue <= 155)):
+    elif((red <= 255 and red >= 220) and (green <= 200 and green >= 90) and (blue >= 10 and blue <= 165)):
        red = 242
        green = 111
        blue = 34
