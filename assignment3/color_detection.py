@@ -302,6 +302,29 @@ def main():
     cv2.imshow("Res3", res3)
     cv2.imshow("Res4", res4)
 
+
+
+    cap = cv2.VideoCapture('MandMVideoSmall.mp4')
+
+    while(True):
+        # Capture frame-by-frame
+        ret, frame = cap.read()
+
+        # Our operations on the frame come here
+        vid = cv2.cvtColor(frame, 0)
+
+        # Display the resulting frame
+        num_red = 0
+        num_green = 0
+        num_blue = 0
+        num_yellow = 0
+        num_orange = 0
+        num_brown = 0
+        updateText(vid, num_red, num_green, num_blue, num_yellow, num_orange, num_brown)
+
+        cv2.imshow('Video', vid)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
