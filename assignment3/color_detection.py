@@ -313,15 +313,38 @@ def main():
         # Our operations on the frame come here
         vid = cv2.cvtColor(frame, 0)
 
-        # Display the resulting frame
-        num_red = 0
-        num_green = 0
-        num_blue = 0
-        num_yellow = 0
-        num_orange = 0
-        num_brown = 0
-        updateText(vid, num_red, num_green, num_blue, num_yellow, num_orange, num_brown)
-
+        #blur and run canny on frame
+        blur = cv2.GaussianBlur(vid, (5, 5), 1)
+        edge = cv2.Canny(blur, 200, 150)
+        #find circles in frame
+        circles = cv2.HoughCircles(edge, cv2.HOUGH_GRADIENT, 1, 30, param1=1, param2=30, minRadius=5, maxRadius=0)
+        if(circles is not None):
+            circles1 = np.uint16(np.around(circles))
+            circleLocations = []
+            #fill in circles
+            for i in circles1[0, :]:
+                #save the location of the circles in the frame
+                circleLocations.append((i[0],i[1]))
+            #find number of colors
+            color = ""
+            for i in range(len(circleLocations)):
+                rgb = vid[circleLocations[i][1], circleLocations[i][0]]
+                red, green, blue = getAverage(vid, circleLocations[i][0], circleLocations[i][1])
+                red, green, blue, color = forceColor(red, green, blue)
+                #cv2.circle(res1, (circleLocations1[i][0], circleLocations1[i][1]), 15, (blue, green, red), -1)
+                if(color == "red"):
+                    num_red += 1
+                elif(color == "green"):
+                    num_green += 1
+                elif(color == "blue"):
+                    num_blue += 1
+                elif(color == "yellow"):
+                    num_yellow += 1
+                elif(color == "orange"):
+                    num_orange += 1
+                elif(color == "brown"):
+                    num_brown += 1
+            updateText(vid, num_red, num_green, num_blue, num_yellow, num_orange, num_brown)
         cv2.imshow('Video', vid)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
