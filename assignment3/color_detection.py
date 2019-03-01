@@ -317,7 +317,7 @@ def main():
         blur = cv2.GaussianBlur(vid, (5, 5), 1)
         edge = cv2.Canny(blur, 200, 150)
         #find circles in frame
-        circles = cv2.HoughCircles(edge, cv2.HOUGH_GRADIENT, 1, 35, param1=1, param2=35, minRadius=0, maxRadius=0)
+        circles = cv2.HoughCircles(edge, cv2.HOUGH_GRADIENT, 1, 35, param1=1, param2=25, minRadius=0, maxRadius=0)
         num_red = 0
         num_green = 0
         num_blue = 0
