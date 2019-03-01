@@ -311,7 +311,8 @@ def main():
         ret, frame = cap.read()
 
         # Our operations on the frame come here
-        vid = cv2.cvtColor(frame, 0)
+        if ret:
+            vid = cv2.cvtColor(frame, 0)
 
         #blur and run canny on frame
         blur = cv2.GaussianBlur(vid, (5, 5), 1)
