@@ -58,7 +58,9 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     cv2.imshow("Frame", pic)
     if cog[1] < 160:
         motors = 6000
+        turn = 6000
         tango.setTarget(MOTORS, motors)
+        tango.setTarget(TURN, turn)
         break
     #near the center
     elif 330 < cog[0] > 310:
@@ -89,7 +91,9 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     # if the `q` key was pressed, break from the loop
     if key == ord("q"):
             motors = 6000
+            turn = 6000
             tango.setTarget(MOTORS, motors)
+            tango.setTarget(TURN, turn)
             break
 
 
