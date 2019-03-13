@@ -35,10 +35,23 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     pic = cv2.Canny(image, 100, 170)
 
     cog = findCoG(pic)
-    print(cog)
     cv2.rectangle(pic, (cog[0]+10, cog[1]+10), (cog[0]-10, cog[1]-10), (255,0,0), 1, 8)
     # show the frame
     cv2.imshow("Frame", pic)
+    if cog[1] < 160:
+        break
+    #near the center
+    elif 330 < cog[0] > 310:
+        #move forward
+    elif 400 > cog[0] > 330:
+        #move left slightly
+    elif cog[0] > 400:
+        #move left hard
+    elif 260 < cog[0] > 310:
+        #move right slightly
+    elif cog[0] < 260:
+        #move right hard
+
     key = cv2.waitKey(1) & 0xFF
 
     # clear the stream in preparation for the next frame
