@@ -11,7 +11,7 @@ camera = PiCamera()
 camera.resolution = (640, 480)
 camera.framerate = 32
 rawCapture = PiRGBArray(camera, size=(640, 480))
-yellow_color_boundaries = [(0, 200, 200), (137, 255, 255)]
+yellow_color_boundaries = [(0, 145, 190), (137, 255, 255)]
 lower_yellow_bound = np.array(yellow_color_boundaries[0], dtype="uint8")
 upper_yellow_bound = np.array(yellow_color_boundaries[1], dtype="uint8")
 
@@ -53,9 +53,16 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     # grab the raw NumPy array representing the image, then initialize the timestamp
     # and occupied/unoccupied text
     image = frame.array
-    mask = cv2.inRange(image, lower_yellow_bound, upper_yellow_bound)
-    pic = cv2.Canny(mask, 100, 170)
-    #pic = cv2.Canny(image, 100, 170)
+    blur = cv2.GuassianBlur()
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    # new_hsv = hsv
+    # for loop in hsv:
+    #     for loop2 in loop:
+    #         new_hsv = (loop+25) % 180
+    #pic = cv2.Canny(hsv[0], 100, 50)
+    #mask = cv2.inRange(image, lower_yellow_bound, upper_yellow_bound)
+    #pic = cv2.Canny(mask, 100, 170)
+    pic = cv2.Canny(hsv[0], 100, 170)
 
     cog = findCoG(pic)
     cv2.rectangle(pic, (cog[0]+10, cog[1]+10), (cog[0]-10, cog[1]-10), (255,0,0), 1, 8)
