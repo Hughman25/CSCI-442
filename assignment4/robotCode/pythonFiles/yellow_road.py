@@ -4,7 +4,7 @@ from picamera import PiCamera
 import time
 import cv2
 import maestro
-import NumPy as np
+import numpy as np
 
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
@@ -14,6 +14,14 @@ rawCapture = PiRGBArray(camera, size=(640, 480))
 
 # allow the camera to warmup
 time.sleep(0.1)
+def findCoG(img):
+    black_pixels = np.argwhere(img >= 200)
+    print(black_pixels)
+    print("\n")
+    black_pixels = np.where(img >= 200)
+    print(black_pixels[0])
+    print("\n")
+    print(black_pixels[1])
 
 # capture frames from the camera
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
@@ -34,13 +42,5 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     if key == ord("q"):
             break
 
-def findCoG(frame):
-    black_pixels = np.argswhere(img >= 200)
-    print(black_pixels)
-    print("\n")
-    black_pixels = np.where(img >= 200)
-    print(black_pixels[0])
-    print("\n")
-    print(black_pixels[1])
 
 
