@@ -12,6 +12,23 @@ camera.resolution = (640, 480)
 camera.framerate = 32
 rawCapture = PiRGBArray(camera, size=(640, 480))
 
+MOTORS = 1
+TURN = 2
+BODY = 0
+HEADTILT = 4
+HEADTURN = 3
+
+tango = maestro.Controller()
+body = 6000
+headTurn = 6000
+headTilt = 1600
+turn = 6000
+
+tango.setTarget(HEADTURN, headTurn)
+tango.setTarget(HEADTILT, headTilt)
+tango.setTarget(TURN, turn)
+tango.setTarget(BODY, body)
+
 # allow the camera to warmup
 time.sleep(0.1)
 def findCoG(img):
@@ -39,6 +56,8 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     # show the frame
     cv2.imshow("Frame", pic)
     if cog[1] < 160:
+        motors = 6000
+        tango.setTarget(MOTORS, motors)
         break
     #near the center
     elif 330 < cog[0] > 310:
@@ -59,6 +78,8 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 
     # if the `q` key was pressed, break from the loop
     if key == ord("q"):
+            motors = 6000
+            tango.setTarget(MOTORS, motors)
             break
 
 
