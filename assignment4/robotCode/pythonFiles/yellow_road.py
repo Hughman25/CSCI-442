@@ -53,7 +53,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     # grab the raw NumPy array representing the image, then initialize the timestamp
     # and occupied/unoccupied text
     image = frame.array
-    mask = cv2.inRange(img, lower_yellow_bound, upper_yellow_bound)
+    mask = cv2.inRange(image, lower_yellow_bound, upper_yellow_bound)
     pic = cv2.Canny(mask, 100, 170)
     #pic = cv2.Canny(image, 100, 170)
 
