@@ -24,6 +24,7 @@ headTurn = 6000
 headTilt = 1600
 turn = 6000
 
+tango.setAccel(MOTORS, 1)
 tango.setTarget(HEADTURN, headTurn)
 tango.setTarget(HEADTILT, headTilt)
 tango.setTarget(TURN, turn)
@@ -62,15 +63,24 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     #near the center
     elif 330 < cog[0] > 310:
         #move forward
+        motors = 6600
+        tango.setTarget(MOTORS, motors)
     elif 400 > cog[0] > 330:
         #move left slightly
+        turn = 2600
+        tango.setTarget(TURN, turn)
     elif cog[0] > 400:
         #move left hard
+        turn = 2110
+        tango.setTarget(TURN, turn)
     elif 260 < cog[0] > 310:
         #move right slightly
+        turn = 6600
+        tango.setTarget(TURN, turn)
     elif cog[0] < 260:
         #move right hard
-
+        turn = 7000
+        tango.setTarget(TURN, turn)
     key = cv2.waitKey(1) & 0xFF
 
     # clear the stream in preparation for the next frame
