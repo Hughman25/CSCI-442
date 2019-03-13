@@ -11,6 +11,9 @@ camera = PiCamera()
 camera.resolution = (640, 480)
 camera.framerate = 32
 rawCapture = PiRGBArray(camera, size=(640, 480))
+lower_yellow_bound = np.array(0, 200, 200)
+upper_yellow_bound = np.array(137, 255, 255)
+yellow_color_boundaries = [(0, 200, 200), (137, 255, 255)]
 
 MOTORS = 1
 TURN = 2
@@ -50,7 +53,9 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     # grab the raw NumPy array representing the image, then initialize the timestamp
     # and occupied/unoccupied text
     image = frame.array
-    pic = cv2.Canny(image, 100, 170)
+    mask = cv2.inRange(img, lower_yellow_bound, upper_yellow_bound)
+    pic = cv2.Canny(mask, 100, 170)
+    #pic = cv2.Canny(image, 100, 170)
 
     cog = findCoG(pic)
     cv2.rectangle(pic, (cog[0]+10, cog[1]+10), (cog[0]-10, cog[1]-10), (255,0,0), 1, 8)
