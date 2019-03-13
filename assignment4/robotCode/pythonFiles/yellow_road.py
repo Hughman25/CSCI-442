@@ -11,9 +11,9 @@ camera = PiCamera()
 camera.resolution = (640, 480)
 camera.framerate = 32
 rawCapture = PiRGBArray(camera, size=(640, 480))
-lower_yellow_bound = np.array(0, 200, 200)
-upper_yellow_bound = np.array(137, 255, 255)
 yellow_color_boundaries = [(0, 200, 200), (137, 255, 255)]
+lower_yellow_bound = np.array(yellow_color_boundaries[0], dtype="uint8")
+upper_yellow_bound = np.array(yellow_color_boundaries[1], dtype="uint8")
 
 MOTORS = 1
 TURN = 2
