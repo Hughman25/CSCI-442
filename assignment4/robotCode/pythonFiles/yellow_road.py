@@ -4,6 +4,7 @@ from picamera import PiCamera
 import time
 import cv2
 import maestro
+import NumPy as np
 
 # initialize the camera and grab a reference to the raw camera capture
 camera = PiCamera()
@@ -20,13 +21,26 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     # and occupied/unoccupied text
     image = frame.array
     pic = cv2.Canny(image, 100, 170)
+
     # show the frame
     cv2.imshow("Frame", pic)
     key = cv2.waitKey(1) & 0xFF
 
+    findCoG(pic)
     # clear the stream in preparation for the next frame
     rawCapture.truncate(0)
 
     # if the `q` key was pressed, break from the loop
     if key == ord("q"):
             break
+
+def findCoG(frame):
+    black_pixels = np.argswhere(img >= 200)
+    print(black_pixels)
+    print("\n")
+    black_pixels = np.where(img >= 200)
+    print(black_pixels[0])
+    print("\n")
+    print(black_pixels[1])
+
+
