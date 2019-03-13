@@ -15,13 +15,17 @@ rawCapture = PiRGBArray(camera, size=(640, 480))
 # allow the camera to warmup
 time.sleep(0.1)
 def findCoG(img):
-    black_pixels = np.argwhere(img >= 200)
-    print(black_pixels)
-    print("\n")
-    black_pixels = np.where(img >= 200)
-    print(black_pixels[0])
-    print("\n")
-    print(black_pixels[1])
+    white_pixels = np.argwhere(img >= 200)
+    size = white_pixels.size
+    sumX = 0
+    sumY
+    for(x, y in white_pixels):
+        sumX += x
+        sumY += y
+    sumX = sumX / size
+    sumY = sumY / size
+    return (x, y)
+
 
 # capture frames from the camera
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
@@ -30,11 +34,12 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     image = frame.array
     pic = cv2.Canny(image, 100, 170)
 
+    cog = findCoG(pic)
+    cv2.Rectangle(pic, (x+10, y+10), (x-10, y-10), (0, 0, 255))
     # show the frame
     cv2.imshow("Frame", pic)
     key = cv2.waitKey(1) & 0xFF
 
-    findCoG(pic)
     # clear the stream in preparation for the next frame
     rawCapture.truncate(0)
 
