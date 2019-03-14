@@ -6,7 +6,7 @@ import cv2
 import maestro
 import numpy as np
 
-# initialize the camera and grab a reference to the raw camera capture
+# initialize the camera and grab a reference to the raw camera capture 
 camera = PiCamera()
 camera.resolution = (640, 480)
 camera.framerate = 32
@@ -22,9 +22,9 @@ HEADTILT = 4
 HEADTURN = 3
 
 tango = maestro.Controller()
-body = 5500
+body = 5700
 headTurn = 6000
-headTilt = 1600
+headTilt = 1200
 turn = 6000
 
 tango.setAccel(MOTORS, 1)
@@ -37,22 +37,24 @@ tango.setTarget(BODY, body)
 time.sleep(1)
 
 def findCoG(img):
-    white_pixels = np.argwhere(img >= 200)
+    white_pixels = np.argwhere(img >= 250)
     size = len(white_pixels)
-    sumX = 0
-    sumY = 0
+    sums = [0, 0] 
     for y, x in white_pixels:
-        sumX += x
-        sumY += y
+        if y > 150:
+            sums[0] += x
+            sums[1] += y
+        else:
+            size = size - 1
     if(size > 0):
-        sumX = sumX / size
-        sumY = sumY / size
+        sums[0] = sums[0] / size
+        sums[1] = sums[1] / size
     else:
         return(-1, -1)
-    return (x, y)
+    return (sums)
 
 def stop():
-    time.sleep(3)
+    time.sleep(1)
     motors = 6000
     turn = 6000
     tango.setTarget(MOTORS, motors)
@@ -64,19 +66,21 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     # grab the raw NumPy array representing the image, then initialize the timestamp
     # and occupied/unoccupied text
     image = frame.array
-    split_image = image[290:640, 0:480]
-    blur = cv2.GaussianBlur(split_image, (5, 5), 1)
+    #split_image = image[150:640, 0:480]
+    blur = cv2.GaussianBlur(image, (5, 5), 1)
     hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, lower_yellow_bound, upper_yellow_bound)
     #pic = cv2.Canny(mask, 100, 170)
     pic = cv2.Canny(mask, 100, 50)
 
     cog = findCoG(pic)
-    if(cog[0] != -1 and cog[1] != -1):
-        cv2.rectangle(pic, (cog[0]+10, cog[1]+10), (cog[0]-10, cog[1]-10), (255, 0, 0), 1, 8)
+    #if(cog[0] != -1 and cog[1] != -1):
+       # cv2.rectangle(pic, (cog[0]-10, cog[1]-10), (cog[0]+10, cog[1]+10), 1, 8)
     # show the frame
     cv2.imshow("Frame", pic)
-    if cog[1] > 340 or cog[0] == -1 and cog[1] == -1:
+    #print(cog)
+
+    if cog[0] == -1 and cog[1] == -1:
         motors = 6000
         turn = 6000
         tango.setTarget(MOTORS, motors)
@@ -84,37 +88,38 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         print("end")
         #break
     #near the center
-    elif 210 <= cog[0] >= 270:
+    elif 260 <= cog[0] <= 420:
         #move forward
         motors = 5350
         tango.setTarget(MOTORS, motors)
         print("forward")
-    elif 350 > cog[0] > 270:
+    elif 490 > cog[0] > 420:
        #move right slightly
-        turn = 5350
+        turn = 5300
         tango.setTarget(TURN, turn)
         print("right slightly")
-    elif cog[0] > 350:
+    elif cog[0] >= 490:
         #move right hard
-        turn = 5350
+        turn = 5200
         tango.setTarget(TURN, turn)
         print("right hard")
-    elif 130 < cog[0] > 210:
-         #move left slightly
-        turn = 6400
+    elif 260 > cog[0] > 180:
+         #move left slightly  
+        turn = 6600
         tango.setTarget(TURN, turn)
         print("left slightly")
-    elif cog[0] < 130:
+    elif cog[0] <= 180:
         #move left hard
-        turn = 6650
+        turn = 6700
         tango.setTarget(TURN, turn)
         print("left hard")
 
     key = cv2.waitKey(1) & 0xFF
 
+
+    stop()
     # clear the stream in preparation for the next frame
     rawCapture.truncate(0)
-    stop()
     # if the `q` key was pressed, break from the loop
     if key == ord("q"):
             motors = 6000
