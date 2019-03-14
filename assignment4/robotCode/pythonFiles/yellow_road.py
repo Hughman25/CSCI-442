@@ -54,7 +54,7 @@ def findCoG(img):
     return (sums)
 
 def stop():
-    time.sleep(1)
+    time.sleep(.75)
     motors = 6000
     turn = 6000
     tango.setTarget(MOTORS, motors)
@@ -90,27 +90,27 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     #near the center
     elif 260 <= cog[0] <= 420:
         #move forward
-        motors = 5350
+        motors = 5200
         tango.setTarget(MOTORS, motors)
         print("forward")
     elif 490 > cog[0] > 420:
        #move right slightly
-        turn = 5300
+        turn = 5350
         tango.setTarget(TURN, turn)
         print("right slightly")
     elif cog[0] >= 490:
         #move right hard
-        turn = 5200
+        turn = 5000
         tango.setTarget(TURN, turn)
         print("right hard")
     elif 260 > cog[0] > 180:
          #move left slightly  
-        turn = 6600
+        turn = 6750
         tango.setTarget(TURN, turn)
         print("left slightly")
     elif cog[0] <= 180:
         #move left hard
-        turn = 6700
+        turn = 7000
         tango.setTarget(TURN, turn)
         print("left hard")
 
