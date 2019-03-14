@@ -11,9 +11,8 @@ camera = PiCamera()
 camera.resolution = (640, 480)
 camera.framerate = 32
 rawCapture = PiRGBArray(camera, size=(640, 480))
-yellow_color_boundaries = [(0, 145, 190), (137, 255, 255)]
 lower_yellow_bound = np.array([25, 50, 50], dtype="uint8")
-upper_yellow_bound = np.array([32, 255, 255], dtype="uint8")
+upper_yellow_bound = np.array([35, 255, 255], dtype="uint8")
 
 MOTORS = 1
 TURN = 2
@@ -26,9 +25,9 @@ body = 5700
 headTurn = 6000
 headTilt = 1200
 turn = 6000
-maxMotor = 5500
-maxLeftTurn = 7100
-maxRightTurn = 4900
+maxMotor = 5650
+maxLeftTurn = 7000
+maxRightTurn = 5100
 motors = 6000
 
 tango.setAccel(MOTORS, 1)
@@ -103,22 +102,22 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         print("end")
         break
     #near the center
-    elif 260 <= x <= 420:
+    elif 280 <= x <= 400:
         turn = 6000
         tango.setTarget(TURN, turn)
         #move forward
         #motors = 5300
-        motors -= 5
+        motors -= 10
         if(motors > maxMotor):
             motors = maxMotor
         tango.setTarget(MOTORS, motors)
         print("forward")
-    elif 490 > x > 420:
+    elif 490 > x > 400:
         motors = 6000
         tango.setTarget(MOTORS, motors)
        #move right slightly
         #turn = 5150
-        turn -= 32
+        turn -= 25
         if(turn < maxRightTurn):
             turn = maxRightTurn
         tango.setTarget(TURN, turn)
@@ -128,17 +127,17 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         tango.setTarget(MOTORS, motors)
         #move right hard
         #turn = 4900
-        turn -= 32
+        turn -= 25
         if(turn < maxRightTurn):
             turn = maxRightTurn
         tango.setTarget(TURN, turn)
         print("right hard")
-    elif 260 > x > 180:
+    elif 280 > x > 180:
         motors = 6000
         tango.setTarget(MOTORS, motors)
          #move left slightly  
         #turn = 6770
-        turn += 32
+        turn += 25
         if(turn > maxLeftTurn):
             turn = maxLeftTurn
         tango.setTarget(TURN, turn)
@@ -148,7 +147,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         tango.setTarget(MOTORS, motors)
         #move left hard
         #turn = 6980
-        turn += 32
+        turn += 25
         if(turn > maxLeftTurn):
             turn = maxLeftTurn
         tango.setTarget(TURN, turn)
