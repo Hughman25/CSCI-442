@@ -26,6 +26,10 @@ body = 5700
 headTurn = 6000
 headTilt = 1200
 turn = 6000
+maxMotor = 5500
+maxLeftTurn = 7100
+maxRightTurn = 4900
+motors = 6000
 
 tango.setAccel(MOTORS, 1)
 tango.setTarget(HEADTURN, headTurn)
@@ -43,7 +47,7 @@ def findCoG(img):
     sumX = 0
     sumY = 0
     for y, x in white_pixels:
-        if y > 150:
+        if y > 175:
             # sums[0] += x
             # sums[1] += y
             sumX += x
@@ -80,51 +84,80 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     pic = cv2.Canny(mask, 100, 50)
 
     x, y = findCoG(pic)
-    if(x != -1 and y != -1):
+    #if(x != -1 and y != -1):
        # cv2.rectangle(pic, (cog[0]-10, cog[1]-10), (cog[0]+10, cog[1]+10), 1, 8)
-        cv2.rectangle(pic, (x-10, y-10), (x+10, y+10), 1, 8)
+       # cv2.rectangle(pic, (x-10, y-10), (x+10, y+10), (255, 0, 0), 1, 8)
     # show the frame
     cv2.imshow("Frame", pic)
     #print(cog)
+ 
 
     if x == -1 and y == -1:
+        motors = 5500
+        tango.setTarget(MOTORS, motors)
+        time.sleep(.5)
         motors = 6000
         turn = 6000
         tango.setTarget(MOTORS, motors)
         tango.setTarget(TURN, turn)
         print("end")
-        #break
+        break
     #near the center
     elif 260 <= x <= 420:
+        turn = 6000
+        tango.setTarget(TURN, turn)
         #move forward
-        motors = 5200
+        #motors = 5300
+        motors -= 5
+        if(motors > maxMotor):
+            motors = maxMotor
         tango.setTarget(MOTORS, motors)
         print("forward")
     elif 490 > x > 420:
+        motors = 6000
+        tango.setTarget(MOTORS, motors)
        #move right slightly
-        turn = 5350
+        #turn = 5150
+        turn -= 32
+        if(turn < maxRightTurn):
+            turn = maxRightTurn
         tango.setTarget(TURN, turn)
         print("right slightly")
     elif x >= 490:
+        motors = 6000
+        tango.setTarget(MOTORS, motors)
         #move right hard
-        turn = 5000
+        #turn = 4900
+        turn -= 32
+        if(turn < maxRightTurn):
+            turn = maxRightTurn
         tango.setTarget(TURN, turn)
         print("right hard")
     elif 260 > x > 180:
+        motors = 6000
+        tango.setTarget(MOTORS, motors)
          #move left slightly  
-        turn = 6750
+        #turn = 6770
+        turn += 32
+        if(turn > maxLeftTurn):
+            turn = maxLeftTurn
         tango.setTarget(TURN, turn)
         print("left slightly")
     elif x <= 180:
+        motors = 6000
+        tango.setTarget(MOTORS, motors)
         #move left hard
-        turn = 7000
+        #turn = 6980
+        turn += 32
+        if(turn > maxLeftTurn):
+            turn = maxLeftTurn
         tango.setTarget(TURN, turn)
         print("left hard")
 
     key = cv2.waitKey(1) & 0xFF
 
 
-    stop()
+    #stop()
     # clear the stream in preparation for the next frame
     rawCapture.truncate(0)
     # if the `q` key was pressed, break from the loop
