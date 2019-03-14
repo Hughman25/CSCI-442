@@ -76,7 +76,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         cv2.rectangle(pic, (cog[0]+10, cog[1]+10), (cog[0]-10, cog[1]-10), (255, 0, 0), 1, 8)
     # show the frame
     cv2.imshow("Frame", pic)
-    if cog[1] < 50:
+    if cog[1] > 340 or cog[0] == -1 and cog[1] == -1:
         motors = 6000
         turn = 6000
         tango.setTarget(MOTORS, motors)
@@ -84,27 +84,27 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         print("end")
         #break
     #near the center
-    elif 330 < cog[0] > 310:
+    elif 210 <= cog[0] >= 270:
         #move forward
         motors = 5350
         tango.setTarget(MOTORS, motors)
         print("forward")
-    elif 400 > cog[0] > 330:
+    elif 350 > cog[0] > 270:
        #move right slightly
         turn = 5350
         tango.setTarget(TURN, turn)
         print("right slightly")
-    elif cog[0] > 400:
+    elif cog[0] > 350:
         #move right hard
         turn = 5350
         tango.setTarget(TURN, turn)
         print("right hard")
-    elif 260 < cog[0] > 310:
+    elif 130 < cog[0] > 210:
          #move left slightly
         turn = 6400
         tango.setTarget(TURN, turn)
         print("left slightly")
-    elif cog[0] < 260:
+    elif cog[0] < 130:
         #move left hard
         turn = 6650
         tango.setTarget(TURN, turn)
