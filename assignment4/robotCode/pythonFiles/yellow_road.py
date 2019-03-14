@@ -39,19 +39,25 @@ time.sleep(1)
 def findCoG(img):
     white_pixels = np.argwhere(img >= 250)
     size = len(white_pixels)
-    sums = [0, 0] 
+    # sums = [0, 0] 
+    sumX = 0
+    sumY = 0
     for y, x in white_pixels:
         if y > 150:
-            sums[0] += x
-            sums[1] += y
+            # sums[0] += x
+            # sums[1] += y
+            sumX += x
+            sumY += y
         else:
             size = size - 1
     if(size > 0):
-        sums[0] = sums[0] / size
-        sums[1] = sums[1] / size
+        # sums[0] = sums[0] / size
+        # sums[1] = sums[1] / size
+        sumX = sumX / size
+        sumY = sumY / size
     else:
-        return(-1, -1)
-    return (sums)
+        return -1, -1
+    return sumX, sumY
 
 def stop():
     time.sleep(.75)
@@ -73,14 +79,15 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     #pic = cv2.Canny(mask, 100, 170)
     pic = cv2.Canny(mask, 100, 50)
 
-    cog = findCoG(pic)
-    #if(cog[0] != -1 and cog[1] != -1):
+    x, y = findCoG(pic)
+    if(x != -1 and y != -1):
        # cv2.rectangle(pic, (cog[0]-10, cog[1]-10), (cog[0]+10, cog[1]+10), 1, 8)
+        cv2.rectangle(pic, (x-10, y-10), (x+10, y+10), 1, 8)
     # show the frame
     cv2.imshow("Frame", pic)
     #print(cog)
 
-    if cog[0] == -1 and cog[1] == -1:
+    if x == -1 and y == -1:
         motors = 6000
         turn = 6000
         tango.setTarget(MOTORS, motors)
@@ -88,27 +95,27 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         print("end")
         #break
     #near the center
-    elif 260 <= cog[0] <= 420:
+    elif 260 <= x <= 420:
         #move forward
         motors = 5200
         tango.setTarget(MOTORS, motors)
         print("forward")
-    elif 490 > cog[0] > 420:
+    elif 490 > x > 420:
        #move right slightly
         turn = 5350
         tango.setTarget(TURN, turn)
         print("right slightly")
-    elif cog[0] >= 490:
+    elif x >= 490:
         #move right hard
         turn = 5000
         tango.setTarget(TURN, turn)
         print("right hard")
-    elif 260 > cog[0] > 180:
+    elif 260 > x > 180:
          #move left slightly  
         turn = 6750
         tango.setTarget(TURN, turn)
         print("left slightly")
-    elif cog[0] <= 180:
+    elif x <= 180:
         #move left hard
         turn = 7000
         tango.setTarget(TURN, turn)
