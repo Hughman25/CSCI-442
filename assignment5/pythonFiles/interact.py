@@ -174,6 +174,7 @@ def centerBody():
                         yabs = abs(240 - ycenter)
                         
                         if((xabs > 30) or (yabs > 20)):
+
                                 if(6000 + (xabs*2) >= 6300):
                                         if(xdist > 0): #turn robot left 
                                                 if(body < 6000): #if was previously turned other way
@@ -284,7 +285,7 @@ def startTimer():
         
 def checkTimer(time_bool):
         if(time_bool):
-                if(time.time - start_time > 15):
+                if(time.time - start_time > 4):
                         findHuman()
         else:
                 start_time = 0
