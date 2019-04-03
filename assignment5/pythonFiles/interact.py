@@ -22,7 +22,7 @@ HEADTILT = 4
 HEADTURN = 3
 
 tango = maestro.Controller()
-body = 5700
+body = 6000
 headTurn = 6000
 headTilt = 5500
 turn = 6000
@@ -38,31 +38,7 @@ tango.setTarget(HEADTILT, headTilt)
 #tango.setTarget(BODY, body)
 
 # allow the camera to warmup
-#time.sleep(1)
-height = 480
-width = 640
-hCenter = 480/2
-wCenter = 640/2
-#top left quadrant
-htopLeftMin = 0
-wtopLeftMin = 0
-htopLeftMax = hCenter/2
-wtopLeftMax = wCenter/2
-#top right quadrant
-htopRightMin = 0
-wtopRightMin = wCenter
-htopRightMax = hCenter
-wtopRightMax = 640
-#bottom left quadrant
-hbotLeftMin = hCenter
-wbotLeftMin = 0
-hbotLeftMax = height
-wbotLeftMax = wCenter
-#bottom right Quadrant
-hbotRightMin = hCenter
-wbotRightMin = wCenter
-hbotRightMax = height
-wbotRightMax = width
+
 
 # capture frames from the camera
 cv2.namedWindow("Robo", cv2.WINDOW_NORMAL)
@@ -72,7 +48,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     # grab the raw NumPy array representing the image, then initialize the timestamp
     # and occupied/unoccupied text
     image = frame.array
-    print(len(image), " ", len(image[1]))
+    #print(len(image), " ", len(image[1]))
 
     #split_image = image[150:640, 0:480]
     #blur = cv2.GaussianBlur(image, (5, 5), 1)
@@ -84,7 +60,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     #picture_1 = frame
     face_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_frontalface_default.xml')
     #eye_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_eye.xml')
-    #height, width, depth = frame.shape
+    #height, width, depth = frame.shape 
     #picture_2 = np.zeros((height, width, 3), np.uint8)
     #picture_2[:, 0:width//2] = (30, 30, 30)      # (B, G, R)
     #picture_2[:, width//2:width] = (30, 30, 30)
@@ -98,61 +74,56 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         ycenter = y + int((h/2)) 
         xdist = 320 - xcenter
         ydist = 240 - ycenter
-        #print("x", xcenter, ": y", ycenter)
         xabs = abs(320 - xcenter)
         yabs = abs(240 - ycenter)
         
         if((xabs > 30) or (yabs > 20)):
-                if(6000 + (xabs*2) > 7500):
-                        pass
+                if(6000 + (xabs*2) >= 6300):
+                        if(xdist > 0): #turn robot left 
+                                if(body < 6000): #if was previously turned other way
+                                        body = 6000
+                                if(body == 6000):
+                                        body = 6600
+                                elif(body == 6600): #already turned body, so turn machine
+                                        turn = 7000
+                                        tango.setTarget(MOTORS, motors)
+                                        tango.setTarget(TURN, turn)
+                                        time.sleep(0.5)
+                                        body = 6000
+                                tango.setTarget(TURN, 6000)
+                                tango.setTarget(BODY, body)
+                        elif(xdist < 0): # turn robot right
+                                if(body > 6000): # if was previously turned other way
+                                        body = 6000
+                                elif(body == 6000):
+                                        body = 5400
+                                elif(body == 5400):
+                                        turn = 5000
+                                        tango.setTarget(MOTORS, motors)
+                                        tango.setTarget(TURN, turn)
+                                        time.sleep(0.5)
+                                        body = 6000
+                                tango.setTarget(TURN, 6000)
+                                tango.setTarget(BODY, body)
+                
                 tango.setTarget(HEADTURN, 6000 + (xdist*2))
                 tango.setTarget(HEADTILT, 6000 + (int(ydist*2.5)))
-                print(xdist, " ", ydist)
-                '''
-                if(xabs > 0 and yabs > 0): # top left
-                        hspeed = int((320 - xcenter)/2) #head movement speed horizontle
-                        vspeed = int((240 - ycenter)/2) #verticle
-                        tango.setTarget(HEADTURN, 6000 + hspeed)
-                        tango.setTarget(HEADTILT, 6000 + vspeed)
-                elif(xabs > 0 and yabs < 0): # bottom left
-                        pass
-                elif(xabs < 0 and yabs > 0): # top right
-                        pass
-                elif(xabs < 0 and yabs < 0): # bottom right
-                        pass
-                '''
-        '''
-        if(xcenter < 285 and ycenter < 205): #top left
-                hspeed = int((320 - xcenter)/2) #head movement speed horizontle
-                vspeed = int((240 - ycenter)/2) #verticle
-                tango.setTarget(HEADTURN, 6000 + hspeed)
-                tango.setTarget(HEADTILT, 6000 + vspeed)
-
-        elif(xcenter > 355 and ycenter < 205):#bottom left
-                hspeed = int((320 + xcenter)/2) #head movement speeds
-                vspeed = int((240 - ycenter)/2) #
-                tango.setTarget(HEADTURN, 6000 - hspeed)
-                tango.setTarget(HEADTILT, 6000 + vspeed)
-
-        elif(xcenter < 285 and ycenter > 275):#top right
-                hspeed = int((320 - xcenter)/2)  #head movement speeds
-                vspeed = int((240 + ycenter)/2) #
-                tango.setTarget(HEADTURN, 6000 - hspeed)
-                tango.setTarget(HEADTILT, 6000 + vspeed)
-
-        elif(xcenter > 355 and ycenter > 275):#bottom right
-                hspeed = int((320 + xcenter)/2)  #head movement speeds
-                vspeed = int((240 + ycenter)/2) #
-                tango.setTarget(HEADTURN, 6000 - hspeed)
-                tango.setTarget(HEADTILT, 6000 - vspeed)
-        '''
-        #roi_gray = gray[y:y+h, x:x+w]
-        #roi_color = picture_3[y:y+h, x:x+w]
-        #eyes = eye_cascade.detectMultiScale(roi_gray)
-        #for (ex,ey,ew,eh) in eyes:
-            #cv2.rectangle(roi_color,(ex,ey),(ex+ew,ey+eh),(0,255,0),2)
-        #cv2.imshow("Robo", image)
-    #cv2.rectangle(image,(285,205), (355, 275), (255,0,0, 2))
+        area = x * y 
+        print(area)
+        if(area > 45000): #move forwwards
+                motors = 5200
+                tango.setTarget(MOTORS, motors)
+                time.sleep(0.35)
+        elif(area < 35000): #move backwards
+                motors = 6900
+                tango.setTarget(MOTORS, motors)       
+                time.sleep(0.35)
+        else:
+                motors = 6000
+                tango.setTarget(MOTORS, motors)  
+        motors = 6000
+        tango.setTarget(MOTORS, motors)
+       
     cv2.imshow("Robo", image)
     
 
@@ -170,6 +141,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
             #tango.setTarget(MOTORS, motors)
             tango.setTarget(TURN, turn)
             tango.setTarget(HEADTILT, headTilt)
+            tango.setTarget(BODY, 6000)
             break
 
 
