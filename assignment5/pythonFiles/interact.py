@@ -37,7 +37,7 @@ rtb = False #rotate tback
 tff = True #tilt face forward
 tfb = False# tilt face back
 temp = 0
-
+i = 0
 
 #Assign values to motors
 tango.setTarget(HEADTURN, headTurn)
@@ -46,7 +46,7 @@ tango.setTarget(HEADTILT, headTilt)
 #tango.setTarget(BODY, body)
 #
 # allow the camera to warmup
-#time.sleep(1)
+time.sleep(1)
 
 #Set timer variables
 start_time = 0
@@ -71,29 +71,48 @@ def shutdown():
         tango.setTarget(HEADTILT, headTilt)
         tango.setTarget(BODY, 6000)
         client.client.killSocket()
+
+
 def findHuman(faces):
-        flag = True
         # headTilt = 6000
+        positions = [(6000, 6000), (6000, 7000), (7000, 7000), (7000, 5000), (6000, 5000)] #tilt, turn
+        global headTilt, headTurn, i
         # headTurn = 6000
         if (len(faces) != 0):
                 print("FOUND")
                 client.client.sendData("Hello Human")
                 return True
         else:
-                if(headTilt == 6000 and headTurn == 6000):
-                        headTurn = 7000
-                elif(headTilt == 6000 and headTurn == 7000):
-                        headTilt = 7000
-                elif(headTilt == 7000 and headTurn == 7000):
-                        headTurn = 5000
-                elif(headTilt == 7000 and headTurn == 5000):
-                        headTilt = 5000
-                elif(headTilt == 5000 and headTurn == 5000):
-                        headTurn == 7000
+                
+                tango.setTarget(HEADTURN, positions[i][1])
+                tango.setTarget(HEADTILT, positions[i][0])
+                time.sleep(0.5)
+                '''
+                if(headTilt >= 7000 and headTurn >= 7000):
+                        headTurn = headTurn - 125
+                        print("3")
+                elif(headTilt >= 6000 and headTurn >= 7000):
+                        headTilt = headTilt + 125
+                        print("2: ", headTilt)
+                elif(headTilt >= 7000 and headTurn <= 5000):
+                        headTilt = headTilt - 125
+                        print("4")
+                elif(headTilt <= 5000 and headTurn <= 5000):
+                        headTurn == headTurn + 125
+                        print("5")
+                elif(headTilt <= 5000 and headTurn >= 7000):
+                        headTilt = headTilt - 125
+                        print("6")
+                else:
+                        headTurn = headTurn + 125
+                        print("1")
                 
                 tango.setTarget(HEADTURN, headTurn)
                 tango.setTarget(HEADTILT, headTilt)
-
+                '''
+                i = i + 1
+                if(i == 5):
+                        i = 0
                 return False
         
         #centerBody(image, faces)
@@ -101,6 +120,7 @@ def findHuman(faces):
                 
 
 def centerBody(xabs, yabs, xdist):
+        global body, motors, turn
        # for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         #image = frame.array
         #ace_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_frontalface_default.xml')
@@ -115,7 +135,7 @@ def centerBody(xabs, yabs, xdist):
         #         xabs = abs(320 - xcenter)
         #         yabs = abs(240 - ycenter)
                 
-        if((xabs > 30) or (yabs > 20)):
+        if((xabs > 60) or (yabs > 60)):
                 if(xdist > 0): #turn robot left 
                         if(body < 6000): #if was previously turned other way
                                 body = 6000
@@ -123,7 +143,7 @@ def centerBody(xabs, yabs, xdist):
                                 body = 6600
                         elif(body == 6600): #already turned body, so turn machine
                                 turn = 7000
-                                tango.setTarget(MOTORS, motors)
+                                #tango.setTarget(MOTORS, motors)
                                 tango.setTarget(TURN, turn)
                                 time.sleep(0.5)
                                 body = 6000
@@ -142,35 +162,23 @@ def centerBody(xabs, yabs, xdist):
                                 body = 6000
                         tango.setTarget(TURN, 6000)
                         tango.setTarget(BODY, body)
+                tango.setTarget(HEADTURN, 6000)
+                tango.setTarget(HEADTILT, 6000)
                 return True
         else:
                 print("TEST1")
                 return True
         
 def centerScreen(xabs, yabs, xdist, ydist):
-        tango.setTarget(HEADTURN, headTurn)
-        tango.setTarget(HEADTILT, headTilt)
+        tango.setTarget(HEADTURN, 6000)
+        tango.setTarget(HEADTILT, 6000)
         
-        for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-                image = frame.array
-                face_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_frontalface_default.xml')
-                faces = face_cascade.detectMultiScale(image, 1.3, 4)
-                checkFaces(faces)
-                for (x,y,w,h) in faces:
-                        cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
-                        xcenter = x + int((w/2))
-                        ycenter = y + int((h/2)) 
-                        xdist = 320 - xcenter
-                        ydist = 240 - ycenter
-                        xabs = abs(320 - xcenter)
-                        yabs = abs(240 - ycenter)
-                        if((xabs > 30) or (yabs > 20)):
-                                tango.setTarget(HEADTURN, 6000 + (xdist*2))
-                                tango.setTarget(HEADTILT, 6000 + (int(ydist*2.5)))
-                        elif((xabs < 30) and (yabs > 20)):
-                                if(flag):
-                                        return True
-                        return False
+        if((xabs > 30) or (yabs > 20)):
+                tango.setTarget(HEADTURN, 6000 + (xdist*2))
+                tango.setTarget(HEADTILT, 6000 + (int(ydist*2.5)))
+        elif((xabs < 30) and (yabs > 20)):
+                return True
+        return False
         
 def centerDistance(x, y):
         area = x * y 
