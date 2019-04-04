@@ -181,10 +181,10 @@ def centerScreen(xabs, yabs, xdist, ydist):
         tango.setTarget(HEADTURN, 6000)
         tango.setTarget(HEADTILT, 6000)
         
-        if((xabs > 30) or (yabs > 20)):
+        if((xabs > 50) or (yabs > 40)):
                 tango.setTarget(HEADTURN, 6000 + (xdist*2))
                 tango.setTarget(HEADTILT, 6000 + (int(ydist*2.5)))
-        elif((xabs < 30) and (yabs > 20)):
+        elif((xabs < 50) and (yabs > 40)):
                 return True
         return False
         
@@ -231,23 +231,23 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 
         if(findHuman(faces)):
                 checkTimer(False)
-                for (x,y,w,h) in faces:
-                        cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
-                        xcenter = x + int((w/2))
-                        ycenter = y + int((h/2)) 
-                        xdist = 320 - xcenter
-                        ydist = 240 - ycenter
-                        xabs = abs(320 - xcenter)
-                        yabs = abs(240 - ycenter)
+                x,y,w,h = faces[0]
+                cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
+                xcenter = x + int((w/2))
+                ycenter = y + int((h/2)) 
+                xdist = 320 - xcenter
+                ydist = 240 - ycenter
+                xabs = abs(320 - xcenter)
+                yabs = abs(240 - ycenter)
 
-                        if(bodyFlag):
-                                centerBody(xabs, yabs, xdist)
-                        else:
-                                centerScreen(xabs, yabs, xdist, ydist)
-                                if(distFlag):
-                                        centerDistance(x, y)
-                                        if(centerScreen(xabs, yabs, xdist, ydist)):
-                                                print("Found you human")
+                if(bodyFlag):
+                        centerBody(xabs, yabs, xdist)
+                else:
+                        centerScreen(xabs, yabs, xdist, ydist)
+                        if(distFlag):
+                                centerDistance(x, y)
+                                if(centerScreen(xabs, yabs, xdist, ydist)):
+                                        print("Found you human")
         else:
                 if(time_flag):
                         startTimer()
