@@ -94,53 +94,16 @@ def findHuman(faces):
                 tango.setTarget(HEADTURN, positions[i][1])
                 tango.setTarget(HEADTILT, positions[i][0])
                 time.sleep(0.5)
-                '''
-                if(headTilt >= 7000 and headTurn >= 7000):
-                        headTurn = headTurn - 125
-                        print("3")
-                elif(headTilt >= 6000 and headTurn >= 7000):
-                        headTilt = headTilt + 125
-                        print("2: ", headTilt)
-                elif(headTilt >= 7000 and headTurn <= 5000):
-                        headTilt = headTilt - 125
-                        print("4")
-                elif(headTilt <= 5000 and headTurn <= 5000):
-                        headTurn == headTurn + 125
-                        print("5")
-                elif(headTilt <= 5000 and headTurn >= 7000):
-                        headTilt = headTilt - 125
-                        print("6")
-                else:
-                        headTurn = headTurn + 125
-                        print("1")
-                
-                tango.setTarget(HEADTURN, headTurn)
-                tango.setTarget(HEADTILT, headTilt)
-                '''
                 i = i + 1
                 if(i == 5):
                         i = 0
                 return False
         
-        #centerBody(image, faces)
 
                 
 
 def centerBody(xabs, yabs, xdist):
         global body, motors, turn, bodyFlag
-       # for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-        #image = frame.array
-        #ace_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_frontalface_default.xml')
-        #faces = face_cascade.detectMultiScale(image, 1.3, 4)
-       # checkFaces(faces)
-        # for (x,y,w,h) in faces:
-        #         cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
-        #         xcenter = x + int((w/2))
-        #         ycenter = y + int((h/2)) 
-        #         xdist = 320 - xcenter
-        #         ydist = 240 - ycenter
-        #         xabs = abs(320 - xcenter)
-        #         yabs = abs(240 - ycenter)
                 
         if((xabs > 100) or (yabs > 100)):
                 if(xdist > 0): #turn robot left 
@@ -171,11 +134,9 @@ def centerBody(xabs, yabs, xdist):
                         tango.setTarget(BODY, body)
                 tango.setTarget(HEADTURN, 6000)
                 tango.setTarget(HEADTILT, 6000)
-                bodyFlag = False
-                return True
         else:
                 print("TEST1")
-                return True
+                bodyFlag = False
         
 def centerScreen(xabs, yabs, xdist, ydist):
         tango.setTarget(HEADTURN, 6000)
@@ -219,8 +180,6 @@ def checkTimer(time_bool):
                 start_time = 0
                 time_flag = True
 
-#findHuman()
-
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     
         # grab the raw NumPy array representing the image
@@ -255,85 +214,6 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                 else:
                         checkTimer(True)
 
-                '''
-                if((xabs > 30) or (yabs > 20)):
-                        if(6000 + (xabs*2) >= 6300):
-                                if(xdist > 0): #turn robot left 
-                                        if(body < 6000): #if was previously turned other way
-                                                body = 6000
-                                        if(body == 6000):
-                                                body = 6600
-                                        elif(body == 6600): #already turned body, so turn machine
-                                                turn = 7000
-                                                tango.setTarget(MOTORS, motors)
-                                                tango.setTarget(TURN, turn)
-                                                time.sleep(0.5)
-                                                body = 6000
-                                        tango.setTarget(TURN, 6000)
-                                        tango.setTarget(BODY, body)
-                                elif(xdist < 0): # turn robot right
-                                        if(body > 6000): # if was previously turned other way
-                                                body = 6000
-                                        elif(body == 6000):
-                                                body = 5400
-                                        elif(body == 5400):
-                                                turn = 5000
-                                                tango.setTarget(MOTORS, motors)
-                                                tango.setTarget(TURN, turn)
-                                                time.sleep(0.5)
-                                                body = 6000
-                                        tango.setTarget(TURN, 6000)
-                                        tango.setTarget(BODY, body)
-                        
-                        tango.setTarget(HEADTURN, 6000 + (xdist*2))
-                        tango.setTarget(HEADTILT, 6000 + (int(ydist*2.5)))
-                area = x * y 
-                if(area > 45000): #move forwwards
-                        motors = 5200
-                        tango.setTarget(MOTORS, motors)
-                        time.sleep(0.35)
-                elif(area < 35000): #move backwards
-                        motors = 6900
-                        tango.setTarget(MOTORS, motors)       
-                        time.sleep(0.35)
-                else:
-                        motors = 6000
-                        tango.setTarget(MOTORS, motors)  
-                motors = 6000
-                tango.setTarget(MOTORS, motors)
-                
-        rtf = True #rotate turn forwards
-        rtb = False #rotate tback
-        tff = True #tilt face forward
-        tfb = False# tilt face back
-    else:# scan for faces
-        print("hi")
-        if(headTilt <= 7200 and tff == True):
-                headTilt = headTilt + 1
-        else:
-                ttf = False
-                tfb = True
-        if(headTilt >= 2500 and tfb == True):
-                headTilt = headTilt - 1
-        else:
-                tfb = False
-                ttf = True
-
-        if(headTurn <= 7200 and rtf == True):
-                headTurn = headTurn + 1
-        else:
-                rtf = False
-                rtb = True
-
-        if(headTurn >= 2500 and rtb == True):
-                headTurn = headTurn - 1
-        else:
-                rtb = False
-                rtf = True
-        
-        tango.setTarget(HEADTURN, headTurn)
-        tango.setTarget(HEADTILT, headTilt)
-        '''
         showImage(image)
         key = cv2.waitKey(1) & 0xFF
 
