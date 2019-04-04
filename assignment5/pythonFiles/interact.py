@@ -70,99 +70,87 @@ def shutdown():
         tango.setTarget(TURN, turn)
         tango.setTarget(HEADTILT, headTilt)
         tango.setTarget(BODY, 6000)
-        #my_client.killSocket
-def findHuman():
-        key = cv2.waitKey(1) & 0xFF
+        client.client.killSocket()
+def findHuman(faces):
         flag = True
-        headTilt = 6000
-        headTurn = 6000
+        # headTilt = 6000
+        # headTurn = 6000
+        if (len(faces) != 0):
+                print("FOUND")
+                client.client.sendData("Hello Human")
+                return True
+        else:
+                if(headTilt == 6000 and headTurn == 6000):
+                        headTurn = 7000
+                elif(headTilt == 6000 and headTurn == 7000):
+                        headTilt = 7000
+                elif(headTilt == 7000 and headTurn == 7000):
+                        headTurn = 5000
+                elif(headTilt == 7000 and headTurn == 5000):
+                        headTilt = 5000
+                elif(headTilt == 5000 and headTurn == 5000):
+                        headTurn == 7000
+                
+                tango.setTarget(HEADTURN, headTurn)
+                tango.setTarget(HEADTILT, headTilt)
+
+                return False
         
-        for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-                image = frame.array
-                face_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_frontalface_default.xml')
-                faces = face_cascade.detectMultiScale(image, 1.3, 4)
-                if (len(faces) != 0):
-                        print("NONO")
-                        break
-                else:
-                        if(headTilt == 6000 and headTurn == 6000):
-                                headTurn = 7000
-                        elif(headTilt == 6000 and headTurn == 7000):
-                                headTilt = 7000
-                        elif(headTilt == 7000 and headTurn == 7000):
-                                headTurn = 5000
-                        elif(headTilt == 7000 and headTurn == 5000):
-                                headTilt = 5000
-                        elif(headTilt == 5000 and headTurn == 5000):
-                                headTurn == 7000
-                        
-                        tango.setTarget(HEADTURN, headTurn)
-                        tango.setTarget(HEADTILT, headTilt)
-                
-                showImage(image)
-                # if the `q` key was pressed, break from the loop
-                if key == ord("q"):
-                        shutdown()
-                        break
-        print("HOWDY")
-        client.client.sendData("Hello Human")
-        centerBody(image, faces)
+        #centerBody(image, faces)
 
                 
 
-def centerBody(image, faces):
+def centerBody(xabs, yabs, xdist):
        # for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         #image = frame.array
         #ace_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_frontalface_default.xml')
         #faces = face_cascade.detectMultiScale(image, 1.3, 4)
        # checkFaces(faces)
-        for (x,y,w,h) in faces:
-                cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
-                xcenter = x + int((w/2))
-                ycenter = y + int((h/2)) 
-                xdist = 320 - xcenter
-                ydist = 240 - ycenter
-                xabs = abs(320 - xcenter)
-                yabs = abs(240 - ycenter)
+        # for (x,y,w,h) in faces:
+        #         cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
+        #         xcenter = x + int((w/2))
+        #         ycenter = y + int((h/2)) 
+        #         xdist = 320 - xcenter
+        #         ydist = 240 - ycenter
+        #         xabs = abs(320 - xcenter)
+        #         yabs = abs(240 - ycenter)
                 
-                if((xabs > 30) or (yabs > 20)):
-                        if(xdist > 0): #turn robot left 
-                                if(body < 6000): #if was previously turned other way
-                                        body = 6000
-                                if(body == 6000):
-                                        body = 6600
-                                elif(body == 6600): #already turned body, so turn machine
-                                        turn = 7000
-                                        tango.setTarget(MOTORS, motors)
-                                        tango.setTarget(TURN, turn)
-                                        time.sleep(0.5)
-                                        body = 6000
-                                tango.setTarget(TURN, 6000)
-                                tango.setTarget(BODY, body)
-                        elif(xdist < 0): # turn robot right
-                                if(body > 6000): # if was previously turned other way
-                                        body = 6000
-                                elif(body == 6000):
-                                        body = 5400
-                                elif(body == 5400):
-                                        turn = 5000
-                                        tango.setTarget(MOTORS, motors)
-                                        tango.setTarget(TURN, turn)
-                                        time.sleep(0.5)
-                                        body = 6000
-                                tango.setTarget(TURN, 6000)
-                                tango.setTarget(BODY, body)
-                else:
-                        print("TEST1")
-        showImage(image)
-        # if the `q` key was pressed, break from the loop
-        if key == ord("q"):
-                shutdown()
+        if((xabs > 30) or (yabs > 20)):
+                if(xdist > 0): #turn robot left 
+                        if(body < 6000): #if was previously turned other way
+                                body = 6000
+                        if(body == 6000):
+                                body = 6600
+                        elif(body == 6600): #already turned body, so turn machine
+                                turn = 7000
+                                tango.setTarget(MOTORS, motors)
+                                tango.setTarget(TURN, turn)
+                                time.sleep(0.5)
+                                body = 6000
+                        tango.setTarget(TURN, 6000)
+                        tango.setTarget(BODY, body)
+                elif(xdist < 0): # turn robot right
+                        if(body > 6000): # if was previously turned other way
+                                body = 6000
+                        elif(body == 6000):
+                                body = 5400
+                        elif(body == 5400):
+                                turn = 5000
+                                tango.setTarget(MOTORS, motors)
+                                tango.setTarget(TURN, turn)
+                                time.sleep(0.5)
+                                body = 6000
+                        tango.setTarget(TURN, 6000)
+                        tango.setTarget(BODY, body)
+                return True
+        else:
+                print("TEST1")
+                return True
         
-def centerScreen():
+def centerScreen(xabs, yabs, xdist, ydist):
         tango.setTarget(HEADTURN, headTurn)
         tango.setTarget(HEADTILT, headTilt)
-        '''
+        
         for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
                 image = frame.array
                 face_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_frontalface_default.xml')
@@ -181,45 +169,26 @@ def centerScreen():
                                 tango.setTarget(HEADTILT, 6000 + (int(ydist*2.5)))
                         elif((xabs < 30) and (yabs > 20)):
                                 if(flag):
-                                        centerDistance()
-                                        flag = False
-                showImage(image)
-                # if the `q` key was pressed, break from the loop
-                if key == ord("q"):
-                        shutdown()
-                        break
-        '''
-def centerDistance():
-        '''
-        for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-                image = frame.array
-                face_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_frontalface_default.xml')
-                faces = face_cascade.detectMultiScale(image, 1.3, 4)
-                checkFaces(faces)
-                for (x,y,w,h) in faces:
-                        cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
-                        area = x * y 
-                        print(area)
-                        if(area > 45000): #move forwwards
-                                motors = 5200
-                                tango.setTarget(MOTORS, motors)
-                                time.sleep(0.35)
-                        elif(area < 35000): #move backwards
-                                motors = 6900
-                                tango.setTarget(MOTORS, motors)       
-                                time.sleep(0.35)
-                        else:
-                                motors = 6000
-                                tango.setTarget(MOTORS, motors)
-                                centerScreen()
-                        motors = 6000
-                        tango.setTarget(MOTORS, motors)
-                showImage(image)
-                # if the `q` key was pressed, break from the loop
-                if key == ord("q"):
-                        shutdown()
-                        break
-        '''
+                                        return True
+                        return False
+        
+def centerDistance(x, y):
+        area = x * y 
+        if(area > 45000): #move forwwards
+                motors = 5200
+                tango.setTarget(MOTORS, motors)
+                time.sleep(0.35)
+        elif(area < 35000): #move backwards
+                motors = 6900
+                tango.setTarget(MOTORS, motors)       
+                time.sleep(0.35)
+        else:
+                motors = 6000
+                tango.setTarget(MOTORS, motors)
+                centerScreen()
+        motors = 6000
+        tango.setTarget(MOTORS, motors)
+
 def checkFaces(faces):
         if(len(faces) != 0):
                 startTimer()
@@ -237,25 +206,42 @@ def checkTimer(time_bool):
         else:
                 start_time = 0
 
-findHuman()
-'''
+#findHuman()
+
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     
-    # grab the raw NumPy array representing the image
-    image = frame.array
+        # grab the raw NumPy array representing the image
+        image = frame.array
 
-    face_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_frontalface_default.xml')
-    faces = face_cascade.detectMultiScale(image, 1.3, 4)
-    if(len(faces) != 0):
-        for (x,y,w,h) in faces:
-                cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
-                xcenter = x + int((w/2))
-                ycenter = y + int((h/2)) 
-                xdist = 320 - xcenter
-                ydist = 240 - ycenter
-                xabs = abs(320 - xcenter)
-                yabs = abs(240 - ycenter)
-                
+        face_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_frontalface_default.xml')
+        faces = face_cascade.detectMultiScale(image, 1.3, 4)
+
+        if(findHuman(faces)):
+                for (x,y,w,h) in faces:
+                        cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
+                        xcenter = x + int((w/2))
+                        ycenter = y + int((h/2)) 
+                        xdist = 320 - xcenter
+                        ydist = 240 - ycenter
+                        xabs = abs(320 - xcenter)
+                        yabs = abs(240 - ycenter)
+
+                        if(centerBody(xabs, yabs, xdist)):
+                                if(centerScreen(xabs, yabs, xdist, ydist)):
+                                        if(centerDistance(x, y)):
+                                                if(centerScreen(xabs, yabs, xdist, ydist)):
+                                                        print("Found you human")
+                                                else:
+                                                        print("Failed 2nd centerScreen")
+                                        else:
+                                                print("Failed centerDistance")
+                                else:
+                                        print("Failed centerScreen")
+                        else:
+                                print("Failed centerbody")
+        else:
+                print("FAiled findHuman")
+                '''
                 if((xabs > 30) or (yabs > 20)):
                         if(6000 + (xabs*2) >= 6300):
                                 if(xdist > 0): #turn robot left 
@@ -333,16 +319,11 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         
         tango.setTarget(HEADTURN, headTurn)
         tango.setTarget(HEADTILT, headTilt)
-    showImage(image)
-    key = cv2.waitKey(1) & 0xFF
+        '''
+        showImage(image)
+        key = cv2.waitKey(1) & 0xFF
 
-    # if the `q` key was pressed, break from the loop
-    if key == ord("q"):
-        shutdown()
-        break
-'''
-   
-
-
-
-
+        # if the `q` key was pressed, break from the loop
+        if key == ord("q"):
+                shutdown()
+                break
