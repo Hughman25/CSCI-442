@@ -39,6 +39,7 @@ tfb = False# tilt face back
 temp = 0
 i = 0
 
+
 #Assign values to motors
 tango.setTarget(HEADTURN, headTurn)
 tango.setTarget(HEADTILT, headTilt)
@@ -50,7 +51,10 @@ time.sleep(1)
 
 #Set timer variables
 start_time = 0
-flag = True
+bodyFlag = True
+distFlag = True
+time_flag = True
+
 
 # capture frames from the camera
 cv2.namedWindow("Robo", cv2.WINDOW_NORMAL)
@@ -75,6 +79,9 @@ def shutdown():
 
 def findHuman(faces):
         # headTilt = 6000
+        global bodyFlag, distFlag
+        bodyFlag = True
+        distFlag = True
         positions = [(6000, 6000), (6000, 7000), (7000, 7000), (7000, 5000), (6000, 5000)] #tilt, turn
         global headTilt, headTurn, i
         # headTurn = 6000
@@ -120,7 +127,7 @@ def findHuman(faces):
                 
 
 def centerBody(xabs, yabs, xdist):
-        global body, motors, turn
+        global body, motors, turn, bodyFlag
        # for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         #image = frame.array
         #ace_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_frontalface_default.xml')
@@ -135,12 +142,12 @@ def centerBody(xabs, yabs, xdist):
         #         xabs = abs(320 - xcenter)
         #         yabs = abs(240 - ycenter)
                 
-        if((xabs > 60) or (yabs > 60)):
+        if((xabs > 100) or (yabs > 100)):
                 if(xdist > 0): #turn robot left 
                         if(body < 6000): #if was previously turned other way
                                 body = 6000
                         if(body == 6000):
-                                body = 6600
+                                body = 6500
                         elif(body == 6600): #already turned body, so turn machine
                                 turn = 7000
                                 #tango.setTarget(MOTORS, motors)
@@ -153,7 +160,7 @@ def centerBody(xabs, yabs, xdist):
                         if(body > 6000): # if was previously turned other way
                                 body = 6000
                         elif(body == 6000):
-                                body = 5400
+                                body = 5550
                         elif(body == 5400):
                                 turn = 5000
                                 tango.setTarget(MOTORS, motors)
@@ -164,6 +171,7 @@ def centerBody(xabs, yabs, xdist):
                         tango.setTarget(BODY, body)
                 tango.setTarget(HEADTURN, 6000)
                 tango.setTarget(HEADTILT, 6000)
+                bodyFlag = False
                 return True
         else:
                 print("TEST1")
@@ -181,6 +189,7 @@ def centerScreen(xabs, yabs, xdist, ydist):
         return False
         
 def centerDistance(x, y):
+        global distFlag
         area = x * y 
         if(area > 45000): #move forwwards
                 motors = 5200
@@ -193,26 +202,22 @@ def centerDistance(x, y):
         else:
                 motors = 6000
                 tango.setTarget(MOTORS, motors)
-                centerScreen()
         motors = 6000
         tango.setTarget(MOTORS, motors)
+        distFlag = False
 
-def checkFaces(faces):
-        if(len(faces) != 0):
-                startTimer()
-                checkTimer(True)
-        else:
-                checkTimer(False)
 
 def startTimer():
         start_time = time.time
         
 def checkTimer(time_bool):
+        global start_time, time_flag
         if(time_bool):
                 if(time.time - start_time > 4):
                         findHuman()
         else:
                 start_time = 0
+                time_flag = True
 
 #findHuman()
 
@@ -225,6 +230,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
         faces = face_cascade.detectMultiScale(image, 1.3, 4)
 
         if(findHuman(faces)):
+                checkTimer(False)
                 for (x,y,w,h) in faces:
                         cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
                         xcenter = x + int((w/2))
@@ -234,21 +240,21 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                         xabs = abs(320 - xcenter)
                         yabs = abs(240 - ycenter)
 
-                        if(centerBody(xabs, yabs, xdist)):
-                                if(centerScreen(xabs, yabs, xdist, ydist)):
-                                        if(centerDistance(x, y)):
-                                                if(centerScreen(xabs, yabs, xdist, ydist)):
-                                                        print("Found you human")
-                                                else:
-                                                        print("Failed 2nd centerScreen")
-                                        else:
-                                                print("Failed centerDistance")
-                                else:
-                                        print("Failed centerScreen")
+                        if(bodyFlag):
+                                centerBody(xabs, yabs, xdist)
                         else:
-                                print("Failed centerbody")
+                                centerScreen(xabs, yabs, xdist, ydist)
+                                if(distFlag):
+                                        centerDistance(x, y)
+                                        if(centerScreen(xabs, yabs, xdist, ydist)):
+                                                print("Found you human")
         else:
-                print("FAiled findHuman")
+                if(time_flag):
+                        startTimer()
+                        time_flag = False
+                else:
+                        checkTimer(True)
+
                 '''
                 if((xabs > 30) or (yabs > 20)):
                         if(6000 + (xabs*2) >= 6300):
