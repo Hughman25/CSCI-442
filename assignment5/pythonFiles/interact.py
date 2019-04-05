@@ -32,10 +32,6 @@ maxRightTurn = 5000
 motors = 6000
 tCounter = 0
 hCounter = 0
-rtf = True #rotate turn forwards
-rtb = False #rotate tback
-tff = True #tilt face forward
-tfb = False# tilt face back
 temp = 0
 i = 0
 
@@ -50,22 +46,18 @@ tango.setTarget(HEADTILT, headTilt)
 time.sleep(1)
 
 #Set timer variables
-start_time = 0
+start_time = 0.0
 bodyFlag = True
 distFlag = True
 time_flag = True
+findHumanFlag = True
 
 
 # capture frames from the camera
 cv2.namedWindow("Robo", cv2.WINDOW_NORMAL)
 cv2.resizeWindow("Robo", 800, 400)
 cv2.moveWindow("Robo", 0, 0)
-def showImage(image):
-        cv2.imshow("Robo", image)
-        key = cv2.waitKey(1) & 0xFF
-        #stop()
-         # clear the stream in preparation for the next frame
-        rawCapture.truncate(0)
+
 def shutdown():
         #motors = 6000
         turn = 6000
@@ -77,109 +69,95 @@ def shutdown():
         client.client.killSocket()
 
 
-def findHuman(faces):
-        # headTilt = 6000
-        global bodyFlag, distFlag
-        bodyFlag = True
-        distFlag = True
-        positions = [(6000, 6000), (6000, 7000), (7000, 7000), (7000, 5000), (6000, 5000)] #tilt, turn
+def nextSearchPosition():
+        positions = [(6000, 6000, 6000), (6000, 7000, 6500), (6800, 7000, 6500), (6000, 7000, 6500), (5200, 7000, 6500), (6000, 6000, 6000),
+                        (5200, 5000, 5500), (6000, 5000, 5500), (6800, 5000, 5500)] #tilt, turn, bodyturn
         global headTilt, headTurn, i
-        # headTurn = 6000
-        if (len(faces) != 0):
-                print("FOUND")
-                client.client.sendData("Hello Human")
-                return True
-        else:
-                
-                tango.setTarget(HEADTURN, positions[i][1])
-                tango.setTarget(HEADTILT, positions[i][0])
-                time.sleep(0.5)
-                i = i + 1
-                if(i == 5):
-                        i = 0
-                return False
-        
-
+        headTilt = positions[i][0]
+        headTurn = positions[i][1]
+        tango.setTarget(HEADTURN, headTurn)
+        tango.setTarget(HEADTILT, headTilt)
+        tango.setTarget(BODY, positions[i][2])
+        time.sleep(1)
+        i = i + 1
+        if(i == 9):
+                i = 0
                 
 
 def centerBody(xabs, yabs, xdist):
-        global body, motors, turn, bodyFlag
-                
-        if((xabs > 100) or (yabs > 100)):
+        global body, motors, turn, bodyFlag, headTilt, headTurn
+
+        if(headTurn == 5000):
+                body = 5400
+                turn = 5000
+                tango.setTarget(MOTORS, motors)
+                tango.setTarget(TURN, turn)
+                time.sleep(.8)
+
+        elif(headTurn == 7000):
+                body = 6600
+                turn = 7000
+                tango.setTarget(MOTORS, motors)
+                tango.setTarget(TURN, turn)
+                time.sleep(.8)  
+        elif(xabs > 75):
+                print("CRACK")
                 if(xdist > 0): #turn robot left 
                         if(body < 6000): #if was previously turned other way
                                 body = 6000
                         if(body == 6000):
-                                body = 6500
-                        elif(body == 6600): #already turned body, so turn machine
+                                body = 6600
+                        if(body == 6600): #already turned body, so turn machine
                                 turn = 7000
                                 #tango.setTarget(MOTORS, motors)
                                 tango.setTarget(TURN, turn)
                                 time.sleep(0.5)
                                 body = 6000
-                        tango.setTarget(TURN, 6000)
-                        tango.setTarget(BODY, body)
                 elif(xdist < 0): # turn robot right
                         if(body > 6000): # if was previously turned other way
                                 body = 6000
-                        elif(body == 6000):
+                        if(body == 6000):
                                 body = 5550
-                        elif(body == 5400):
+                        if(body == 5550):
                                 turn = 5000
                                 tango.setTarget(MOTORS, motors)
                                 tango.setTarget(TURN, turn)
                                 time.sleep(0.5)
                                 body = 6000
-                        tango.setTarget(TURN, 6000)
-                        tango.setTarget(BODY, body)
-                tango.setTarget(HEADTURN, 6000)
-                tango.setTarget(HEADTILT, 6000)
-        else:
-                print("TEST1")
-                bodyFlag = False
+
+        bodyFlag = False
+        tango.setTarget(TURN, 6000)
+        tango.setTarget(BODY, 6000)
         
 def centerScreen(xabs, yabs, xdist, ydist):
-        tango.setTarget(HEADTURN, 6000)
-        tango.setTarget(HEADTILT, 6000)
         
-        if((xabs > 50) or (yabs > 40)):
+        if((xabs > 60) or (yabs > 50)):
+                xdist = xdist + int(xdist*.3)
+                ydist = ydist + int(ydist*.3)
                 tango.setTarget(HEADTURN, 6000 + (xdist*2))
                 tango.setTarget(HEADTILT, 6000 + (int(ydist*2.5)))
-        elif((xabs < 50) and (yabs > 40)):
+        elif((xabs < 60) and (yabs > 50)):
                 return True
         return False
         
-def centerDistance(x, y):
-        global distFlag
-        area = x * y 
-        if(area > 45000): #move forwwards
-                motors = 5200
-                tango.setTarget(MOTORS, motors)
-                time.sleep(0.35)
-        elif(area < 35000): #move backwards
-                motors = 6900
-                tango.setTarget(MOTORS, motors)       
-                time.sleep(0.35)
-        else:
-                motors = 6000
-                tango.setTarget(MOTORS, motors)
-        motors = 6000
-        tango.setTarget(MOTORS, motors)
-        distFlag = False
 
 
 def startTimer():
-        start_time = time.time
+        global start_time
+        start_time = time.time()
         
 def checkTimer(time_bool):
-        global start_time, time_flag
+        global start_time, time_flag, findHumanFlag, bodyFlag, distFlag
         if(time_bool):
-                if(time.time - start_time > 4):
-                        findHuman()
+                if(time.time() - start_time > 8):
+                        findHumanFlag = True
+                        bodyFlag = True
+                        distFlag = True
         else:
                 start_time = 0
                 time_flag = True
 
+nextSearchPosition()
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     
         # grab the raw NumPy array representing the image
@@ -187,8 +165,10 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
 
         face_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_frontalface_default.xml')
         faces = face_cascade.detectMultiScale(image, 1.3, 4)
-
-        if(findHuman(faces)):
+        if(len(faces) != 0):
+                if(findHumanFlag):
+                        client.client.sendData("Hello Human")
+                        findHumanFlag = False
                 checkTimer(False)
                 x,y,w,h = faces[0]
                 cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
@@ -204,7 +184,21 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                 else:
                         centerScreen(xabs, yabs, xdist, ydist)
                         if(distFlag):
-                                centerDistance(x, y)
+                                if(w*h < 19000 or w*h > 24000):
+                                        if(w*h < 19000): #move forwwards
+                                                temp = (19000-w*h) / 5800
+                                                motors = 5200
+                                                tango.setTarget(MOTORS, motors)
+                                                time.sleep(temp)
+                                        elif(w*h > 24000): #move backwards
+                                                temp = (w*h-24000)/50000
+                                                print(temp)
+                                                motors = 6900
+                                                tango.setTarget(MOTORS, motors)       
+                                                time.sleep(temp)
+                                        distFlag = False
+                                        motors = 6000
+                                        tango.setTarget(MOTORS, motors)
                                 if(centerScreen(xabs, yabs, xdist, ydist)):
                                         print("Found you human")
         else:
@@ -213,9 +207,14 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                         time_flag = False
                 else:
                         checkTimer(True)
+                        if(findHumanFlag):
+                                nextSearchPosition()
 
-        showImage(image)
+        cv2.imshow("Robo", image)
         key = cv2.waitKey(1) & 0xFF
+        #stop()
+         # clear the stream in preparation for the next frame
+        rawCapture.truncate(0)
 
         # if the `q` key was pressed, break from the loop
         if key == ord("q"):
