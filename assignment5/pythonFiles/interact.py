@@ -101,7 +101,6 @@ def centerBody(xabs, yabs, xdist):
                 tango.setTarget(TURN, turn)
                 time.sleep(.8)  
         elif(xabs > 75):
-                print("CRACK")
                 if(xdist > 0): #turn robot left 
                         if(body < 6000): #if was previously turned other way
                                 body = 6000
@@ -128,6 +127,7 @@ def centerBody(xabs, yabs, xdist):
         bodyFlag = False
         tango.setTarget(TURN, 6000)
         tango.setTarget(BODY, 6000)
+        tango.setTarget(HEADTURN, 6000)
         
 def centerScreen(xabs, yabs, xdist, ydist):
         
@@ -192,7 +192,6 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
                                                 time.sleep(temp)
                                         elif(w*h > 24000): #move backwards
                                                 temp = (w*h-24000)/50000
-                                                print(temp)
                                                 motors = 6900
                                                 tango.setTarget(MOTORS, motors)       
                                                 time.sleep(temp)
