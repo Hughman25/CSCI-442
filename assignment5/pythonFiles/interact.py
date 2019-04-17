@@ -30,6 +30,7 @@ maxMotor = 5675
 maxLeftTurn = 7000
 maxRightTurn = 5000
 motors = 6000
+
 tCounter = 0
 hCounter = 0
 temp = 0
