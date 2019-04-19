@@ -50,10 +50,12 @@ final_stage_b = False #True after passing Yellow Line. False after completion.
 
 
 #values for finding orange line with hsv
-lower_yellow_bound = np.array([25, 50, 50], dtype="uint8")
-upper_yellow_bound = np.array([35, 255, 255], dtype="uint8")
-lower_blue_bound = np.array([30, 100, 100], dtype="uint8") #37, 51, 255
-upper_blue_bound = np.array([47, 255, 255], dtype="uint8")
+lower_yellow_bound = np.array([20, 50, 50], dtype="uint8")
+upper_yellow_bound = np.array([39, 255, 255], dtype="uint8")
+lower_pink_bound = np.array([125, 35, 100], dtype="uint8") #37, 51, 255
+upper_pink_bound = np.array([180, 125, 125], dtype="uint8")
+lower_white_bound = np.array([0, 0, 240], dtype="uint8")
+upper_white_bound = np.array([255, 15, 255], dtype="uint8")
 
 time.sleep(2)
 def getFrame(stage):
@@ -70,22 +72,22 @@ def getFrame(stage):
             blur = cv2.GaussianBlur(image, (5, 5), 1)
             hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
             mask = cv2.inRange(hsv, lower_yellow_bound, upper_yellow_bound)
-            #pic = cv2.Canny(mask, 100, 170)
             image = cv2.Canny(mask, 100, 50)
         if stage == 1:
             blur = cv2.GaussianBlur(image, (5, 5), 1)
             hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
-            mask = cv2.inRange(hsv, lower_blue_bound, upper_blue_bound)
-            #pic = cv2.Canny(mask, 100, 170)
+            mask = cv2.inRange(hsv, lower_pink_bound, upper_pink_bound)
             image = cv2.Canny(mask, 100, 50)
         if stage == 2:
-            pass #only see white color
+            blur = cv2.GaussianBlur(image, (5, 5), 1)
+            hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
+            mask = cv2.inRange(hsv, lower_white_bound, upper_white_bound)
+            image = cv2.Canny(mask, 100, 50)
         break
     return image
  
 def showFrame(image):
     cv2.imshow("Main Camera", image)
-    rawCapture.truncate(0)
 
 def shutdown():
     motors = 6000
@@ -96,6 +98,7 @@ def shutdown():
     tango.setTarget(HEADTILT, headTilt)
     tango.setTarget(BODY, 6000)
     client.client.killSocket()
+    quit()
 
 def centerBody(xabs, yabs, xdist):
     global body, motors, turn, bodyFlag, headTilt, headTurn
@@ -155,7 +158,7 @@ def centerScreen(xabs, yabs, xdist, ydist):
 
 
 def findLowestY(img):
-    white_pixels = np.argwhere(img >= 250)
+    white_pixels = np.argwhere(img >= 254)
     lowest_y = 250
     for y, x in white_pixels:
         if y < lowest_y:
@@ -165,16 +168,15 @@ def findLowestY(img):
 
 #function to determine center of gravity
 def findCoG(img):
-    white_pixels = np.argwhere(img >= 250)
+    white_pixels = np.argwhere(img >= 254)
     size = len(white_pixels)
     sumX = 0
     sumY = 0
+    if(size < 100):
+        return -1, -1
     for y, x in white_pixels:
-        if y > 175:
-            sumX += x
-            sumY += y
-        else:
-            size = size - 1
+        sumX += x
+        sumY += y
     if(size > 0):
         sumX = sumX / size
         sumY = sumY / size
@@ -185,24 +187,32 @@ def findCoG(img):
 
 #Find yellow line and cross it
 def init_stage():
-    headTilt = 4500
+    headTilt = 4000
     tango.setTarget(HEADTILT, headTilt)
-    tango.setTarget(TURN, 6500)
+    tango.setTarget(TURN, 7000)
+    flag = False
 
     while True:
         img = getFrame(0)
         showFrame(img)
         x, y = findCoG(img)
+        if x == -1:
+            print("neg")
 
-        if 280 <= x <= 400:
+        if 300 <= x <= 380:
+            print("Forward ini")
             #go forward toward the line
             tango.setTarget(TURN, 6000)
-            tango.setTarget(MOTORS, 7000)
-        if y < 175:
+            tango.setTarget(MOTORS, 5500)
+            flag = True
+        if y > 425 and flag:
+            time.sleep(1)
             tango.setTarget(MOTORS, 6000)
             client.client.sendData("Crossed the First Line")
+            rawCapture.truncate(0)
             break
 
+        rawCapture.truncate(0)
         key = cv2.waitKey(1) & 0xFF
         # if the `q` key was pressed, break from the loop
         if key == ord("q"):
@@ -217,11 +227,12 @@ def stage_one():
         img = getFrame(2)
         showFrame(img)
         y = findLowestY(img)
-        if y >= 175:
+        if y >= 380:
+            print("backwards")
             tango.setTarget(MOTORS, 5500)
             time.sleep(1)
         else:
-            x, y = findCoG
+            x, y = findCoG(img)
             if 490 > x > 400:
                 print("right turn")
                 tango.setTarget(TURN, 5400)
@@ -232,20 +243,24 @@ def stage_one():
                 #forward
                 tango.setTarget(TURN, 6000)
                 print("forward")
-                tango.setTarget(MOTORS, 7000)
+                tango.setTarget(MOTORS, 5500)
 
         #Find blue line
+        rawCapture.truncate(0)
         img = getFrame(1)
 
-        if 280 <= x <= 400:
+        if 300 <= x <= 380:
             #go forward toward the line
             tango.setTarget(TURN, 6000)
-            tango.setTarget(MOTORS, 7000)
-        if y < 175:
+            tango.setTarget(MOTORS, 5400)
+        if y > 420:
+            time.sleep(1)
             tango.setTarget(MOTORS, 6000)
             client.client.sendData("Crossed the Second Line")
+            rawCapture.truncate(0)
             break
         
+        rawCapture.truncate(0)
         key = cv2.waitKey(1) & 0xFF
         # if the `q` key was pressed, break from the loop
         if key == ord("q"):
@@ -280,7 +295,7 @@ def stage_two():
                         if(w*h < 19000 or w*h > 24000):
                             if(w*h < 19000): #move forwwards
                                 temp = (19000-w*h) / 5600
-                                motors = 5200
+                                motors = 5400
                                 tango.setTarget(MOTORS, motors)
                                 time.sleep(temp)
                             elif(w*h > 24000): #move backwards
@@ -292,8 +307,10 @@ def stage_two():
                             motors = 6000
                             tango.setTarget(MOTORS, motors)
                             client.client.sendData("Give me ice prease")
+                            rawCapture.truncate(0)
                             break
 
+        rawCapture.truncate(0)
         key = cv2.waitKey(1) & 0xFF
         # if the `q` key was pressed, break from the loop
         if key == ord("q"):
@@ -321,13 +338,16 @@ def stage_three():
 
         if 280 <= x <= 400:
             #go forward toward the line
+            print("forwards 3")
             tango.setTarget(TURN, 6000)
-            tango.setTarget(MOTORS, 7000)
+            tango.setTarget(MOTORS, 5400)
         if y < 175:
             tango.setTarget(MOTORS, 6000)
             client.client.sendData("Crossed the First Line")
+            rawCapture.truncate(0)
             break
 
+        rawCapture.truncate(0)
         key = cv2.waitKey(1) & 0xFF
         # if the `q` key was pressed, break from the loop
         if key == ord("q"):
@@ -343,7 +363,8 @@ def stage_four():
         showFrame(img)
         y = findLowestY(img)
         if y >= 175:
-            tango.setTarget(MOTORS, 5500)
+            print("Backwards" )
+            tango.setTarget(MOTORS, 6500)
             time.sleep(1)
         else:
             x, y = findCoG
@@ -357,7 +378,7 @@ def stage_four():
                 #forward
                 tango.setTarget(TURN, 6000)
                 print("forward")
-                tango.setTarget(MOTORS, 7000)
+                tango.setTarget(MOTORS, 5400)
 
         #Find yellow line
         img = getFrame(0)
@@ -365,12 +386,14 @@ def stage_four():
         if 280 <= x <= 400:
             #go forward toward the line
             tango.setTarget(TURN, 6000)
-            tango.setTarget(MOTORS, 7000)
+            tango.setTarget(MOTORS, 5400)
         if y < 175:
             tango.setTarget(MOTORS, 6000)
             client.client.sendData("Crossed the Second Line")
+            rawCapture.truncate(0)
             break
         
+        rawCapture.truncate(0)
         key = cv2.waitKey(1) & 0xFF
         # if the `q` key was pressed, break from the loop
         if key == ord("q"):
@@ -384,8 +407,9 @@ def final_stage():
         img = getFrame(3)
         showFrame(3)
 
+        rawCapture.truncate(0)
         key = cv2.waitKey(1) & 0xFF
-        # if the `q` key was pressed, break from the loop
+        # if the `q` key was pressed, break from the loop  
         if key == ord("q"):
             shutdown()
             break
@@ -393,6 +417,7 @@ def final_stage():
     #Dropping ice in Bin
     while True:
 
+        rawCapture.truncate(0)
         key = cv2.waitKey(1) & 0xFF
         # if the `q` key was pressed, break from the loop
         if key == ord("q"):
