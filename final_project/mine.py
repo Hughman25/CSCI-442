@@ -196,8 +196,6 @@ def init_stage():
         img = getFrame(0)
         showFrame(img)
         x, y = findCoG(img)
-        if x == -1:
-            print("neg")
 
         if 300 <= x <= 380:
             print("Forward ini")
