@@ -156,6 +156,32 @@ def centerScreen(xabs, yabs, xdist, ydist):
         return True
     return False
 
+def avoidWhite():
+    #avoid rocks
+    img = getFrame(2)
+    showFrame(img)
+    y = findLowestY(img)
+    if y >= 380:
+        print("backwards")
+        tango.setTarget(MOTORS, 5500)
+        time.sleep(1)
+    else:
+        x, y = findCoG(img)
+        if 490 > x > 375:
+            print("right turn")
+            tango.setTarget(TURN, 5400)
+            time.sleep(.5)
+            tango.setTarget(TURN, 6000)
+        elif 365 > x > 180:
+            print("left turn")
+            tango.setTarget(TURN, 6600)
+            time.sleep(.5)
+            tango.setTarget(TURN, 6000)
+        else:
+            #forward
+            tango.setTarget(TURN, 6000)
+            print("forward")
+            tango.setTarget(MOTORS, 5500)
 
 def findLowestY(img):
     white_pixels = np.argwhere(img >= 254)
@@ -172,7 +198,7 @@ def findCoG(img):
     size = len(white_pixels)
     sumX = 0
     sumY = 0
-    if(size < 100):
+    if(size < 175):
         return -1, -1
     for y, x in white_pixels:
         sumX += x
@@ -221,27 +247,8 @@ def init_stage():
 #Avoid rocks, find and cross blue line
 def stage_one():
     while True:
-        #avoid rocks
-        img = getFrame(2)
-        showFrame(img)
-        y = findLowestY(img)
-        if y >= 380:
-            print("backwards")
-            tango.setTarget(MOTORS, 5500)
-            time.sleep(1)
-        else:
-            x, y = findCoG(img)
-            if 490 > x > 400:
-                print("right turn")
-                tango.setTarget(TURN, 5400)
-            elif 280 > x > 180:
-                print("left turn")
-                tango.setTarget(TURN, 6600)
-            else:
-                #forward
-                tango.setTarget(TURN, 6000)
-                print("forward")
-                tango.setTarget(MOTORS, 5500)
+        tango.setTarget(MOTORS, 5600)
+        avoidWhite()
 
         #Find blue line
         rawCapture.truncate(0)
