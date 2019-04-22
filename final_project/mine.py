@@ -10,6 +10,7 @@ camera = PiCamera()
 camera.resolution = (640, 480)
 camera.framerate = 32
 rawCapture = PiRGBArray(camera, size=(640,480))
+
 #Set motor enums
 BODY = 0
 MOTORS = 1
@@ -18,7 +19,6 @@ HEADTURN = 3
 HEADTILT = 4
 SHOULDER = 6
 HAND = 11
-#set arm motors
 
 #Set default motor values
 tango = maestro.Controller()
@@ -32,7 +32,6 @@ maxRightTurn = 5000
 motors = 6000
 shoulder = 6000
 hand = 6000
-#set arm motors
 
 #Assign values to motors
 tango.setTarget(HEADTURN, headTurn)
@@ -42,16 +41,6 @@ tango.setTarget(BODY, body)
 tango.setTarget(SHOULDER, shoulder)
 tango.setTarget(HAND, hand)
 #set arm targets
-
-#Stage booleans
-init_stage_b = False #Turns false after passing Yellow Line
-stage_one_b = False #Turns to True after passing Yellow line, false after Blue Line
-stage_two_b = False #True after Blue Line, False after obtaining ice from Human
-stage_three_b = False #True after obtaining Ice, False after passing Blue Line
-stage_four_b = False #True after passing Blue Line, False after passing Yellow
-final_stage_b = False #True after passing Yellow Line. False after completion.
-
-# capture frames from the camera
 
 
 #values for finding orange line with hsv
@@ -205,12 +194,12 @@ def avoidWhite():
         print("backwards")
         tango.setTarget(MOTORS, 6800)
         time.sleep(0.4)
-    if 490 > x > 325:
+    if 315 > x > 180:
         print("right turn")
         tango.setTarget(TURN, 5200)
         time.sleep(.75)
         tango.setTarget(TURN, 6000)
-    elif 315 > x > 180:
+    elif 490 > x > 325:
         print("left turn")
         tango.setTarget(TURN, 6800)
         time.sleep(.75)
@@ -318,10 +307,6 @@ def init_stage():
             #Find PINK line
             img = getFrame(1)
             x, y = findCoG(img)
-            # if 300 <= x <= 380:
-            #     #go forward toward the line
-            #     tango.setTarget(TURN, 6000)
-            #     tango.setTarget(MOTORS, 5400)
             if y > 400:
                 time.sleep(1)
                 tango.setTarget(MOTORS, 6000)
@@ -471,12 +456,9 @@ def stage_four():
             #Find yellow line
             img = getFrame(0)
             x, y = findCoG(img)
-            # if 300 <= x <= 380:
-            #     #go forward toward the line
-            #     tango.setTarget(TURN, 6000)
-            #     tango.setTarget(MOTORS, 5400)
+
             if y > 400:
-                time.sleep(1)
+                time.sleep(.8)
                 tango.setTarget(MOTORS, 6000)
                 client.client.sendData("Crossed the Line")
                 rawCapture.truncate(0)
@@ -510,6 +492,7 @@ def final_stage():
             tango.setTarget(MOTORS, 5200)
             flag = True
 
+        #Uses area and center of gravity to compute proper orientation
         if flag:
             ret,thresh = cv2.threshold(gray,127,255,1)
             contours,h = cv2.findContours(thresh,1,2)
@@ -585,4 +568,3 @@ def test():
     tango.setTarget(HEADTURN, headTurn)
 
 #test()
-
