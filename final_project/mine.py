@@ -45,8 +45,10 @@ tango.setTarget(HAND, hand)
 tango.setTarget(ELBOW, elbow)
 #set arm targets
 
+#global flags/vars
 bodyFlag = True
 turnFlag = -1
+i = 0
 
 #values for finding orange line with hsv
 lower_yellow_bound = np.array([20, 50, 50], dtype="uint8")
@@ -131,15 +133,13 @@ def nextSearchPosition():
         positions = [(6000, 6000, 6000), (6000, 7000, 6500), (6800, 7000, 6500), (6000, 7000, 6500), (5200, 7000, 6500), (6000, 6000, 6000),
                         (5200, 5000, 5500), (6000, 5000, 5500), (6800, 5000, 5500)] #tilt, turn, bodyturn
         global headTilt, headTurn, i
-        headTilt = positions[i][0]
-        headTurn = positions[i][1]
+        headTilt = positions[i%9][0]
+        headTurn = positions[i%9][1]
         tango.setTarget(HEADTURN, headTurn)
         tango.setTarget(HEADTILT, headTilt)
-        tango.setTarget(BODY, positions[i][2])
+        tango.setTarget(BODY, positions[i%9][2])
         time.sleep(1.5)
-        i = i + 1
-        if(i == 9):
-                i = 0
+        i += 1
 
 
 #Centers the body of the robot towards a square object
@@ -238,28 +238,22 @@ def avoidWhite():
     showFrame(img, False)
     high_y = findHighestY(img)
     x, y = findCoG(img, True)
+    size = len(np.argwhere(img >= 254))
 
     if high_y >= 410 and 380 > x > 260:
         print("backwards")
-        tango.setTarget(MOTORS, 6000)
-        time.sleep(0.1)
+        if turnFlag == 3:
+            tango.setTarget(TURN, 5200)
+            time.sleep(.85)
+            tango.setTarget(TURN, 6000)
+            turnFlag == 4
+            return 1
+        #tango.setTarget(MOTORS, 6000)
+        #time.sleep(0.1)
         tango.setTarget(MOTORS, 6800)
         time.sleep(0.4)
         tango.setTarget(MOTORS, 6000)
-
-    if turnFlag == 1:
-        tango.setTarget(TURN, 6800)
-        time.sleep(.85)
-        tango.setTarget(TURN, 6000)
-        turnFlag = -1
-        rawCapture.truncate(0)
-        return 1
-    elif turnFlag == 0:
-        tango.setTarget(TURN, 5200)
-        time.sleep(.85)
-        tango.setTarget(TURN, 6000)
-        rawCapture.truncate(0)
-        return 1
+        turnFlag == 3
 
     if 315 > x > 200:
         turnFlag = 1
@@ -273,6 +267,21 @@ def avoidWhite():
         tango.setTarget(TURN, 6800)
         time.sleep(.85)
         tango.setTarget(TURN, 6000)
+
+    if size < 100000:
+        if turnFlag == 1:
+            tango.setTarget(TURN, 6800)
+            time.sleep(.85)
+            tango.setTarget(TURN, 6000)
+            turnFlag = -1
+            rawCapture.truncate(0)
+            return 1
+        elif turnFlag == 0:
+            tango.setTarget(TURN, 5200)
+            time.sleep(.85)
+            tango.setTarget(TURN, 6000)
+            rawCapture.truncate(0)
+            return 1
     rawCapture.truncate(0)
     key = cv2.waitKey(1) & 0xFF
     # if the `q` key was pressed, break from the loop
@@ -327,7 +336,7 @@ def threshold():
     size = len(white_pixels)
     rawCapture.truncate(0)
 
-    if size < 1700:
+    if size < 100000:
         if findCenterWhitePixels(img):
             return 1
         return 0
