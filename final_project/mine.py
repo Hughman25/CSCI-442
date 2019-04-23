@@ -60,41 +60,35 @@ upper_green_bound = np.array([75, 255, 255], dtype="uint8")
 
 
 time.sleep(2)
+
+#Returns the desired image for a given stage
 def getFrame(stage):
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         image = frame.array
         #image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21) #change 21 lower to increase performance, should be odd
                                                                         #change 1st 10 change strength of noise removal, may add after blur.
+        if stage != -1:
+            blur = cv2.GaussianBlur(image, (5, 5), 1)
+            #image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21)
+            hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
+            #image = cv2.Canny(mask, 100, 50) #For safe keeping
         if stage == 0:
-            blur = cv2.GaussianBlur(image, (5, 5), 1)
-            #image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21)
-            hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
             mask = cv2.inRange(hsv, lower_yellow_bound, upper_yellow_bound)
-            #image = cv2.Canny(mask, 100, 50)
         elif stage == 1:
-            blur = cv2.GaussianBlur(image, (5, 5), 1)
-            #image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21)
-            hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
             mask = cv2.inRange(hsv, lower_pink_bound, upper_pink_bound)
-            #image = cv2.Canny(mask, 100, 50)
         elif stage == 2:
-            blur = cv2.GaussianBlur(image, (5, 5), 1)
-            #image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21)
-            hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
             mask = cv2.inRange(hsv, lower_white_bound, upper_white_bound)
-            #image = cv2.Canny(mask, 100, 50)
         elif stage == 3:
-            blur = cv2.GaussianBlur(image, (5, 5), 1)
-            #image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21)
-            hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
             mask = cv2.inRange(hsv, lower_green_bound, upper_green_bound)
-            #image = cv2.Canny(mask, 100, 50)
         break
     return image
 
 
+#Shows the frame
 def showFrame(image, flag):
     cv2.imshow("Main Camera", image)
+    
+    #Apparently fixed an issue with a frozen frame not being replaced by new one.
     if flag:
         key = cv2.waitKey(1) & 0xFF
         # if the `q` key was pressed, break from the loop
@@ -102,6 +96,7 @@ def showFrame(image, flag):
             shutdown()
 
 
+#Stops all motors but not program, had an issue with stopping a motor, this worked.
 def stop():
     motors = 6000
     turn = 6000
@@ -115,6 +110,7 @@ def stop():
     rawCapture.truncate(0)
 
 
+#Shuts down all motors to their original origin and ends program
 def shutdown():
     motors = 6000
     turn = 6000
@@ -130,6 +126,7 @@ def shutdown():
     quit()
 
 
+#Search positions for finding a human, rotates accordingly
 def nextSearchPosition():
         positions = [(6000, 6000, 6000), (6000, 7000, 6500), (6800, 7000, 6500), (6000, 7000, 6500), (5200, 7000, 6500), (6000, 6000, 6000),
                         (5200, 5000, 5500), (6000, 5000, 5500), (6800, 5000, 5500)] #tilt, turn, bodyturn
@@ -139,12 +136,13 @@ def nextSearchPosition():
         tango.setTarget(HEADTURN, headTurn)
         tango.setTarget(HEADTILT, headTilt)
         tango.setTarget(BODY, positions[i][2])
-        time.sleep(1)
+        time.sleep(1.5)
         i = i + 1
         if(i == 9):
                 i = 0
 
 
+#Centers the body of the robot towards a square object
 def centerBody(xabs, yabs, xdist):
     global body, motors, turn, bodyFlag, headTilt, headTurn
 
@@ -191,6 +189,7 @@ def centerBody(xabs, yabs, xdist):
     tango.setTarget(HEADTURN, 6000)
         
 
+#Centers the screen on a square object
 def centerScreen(xabs, yabs, xdist, ydist):
     if((xabs > 60) or (yabs > 50)):
         xdist = xdist + int(xdist*.3)
@@ -202,6 +201,7 @@ def centerScreen(xabs, yabs, xdist, ydist):
     return False
 
 
+#Orientates the robot if it is not properly positioned for the bin
 def orientate(flip):
     if(flip):
         tango.setTarget(TURN, 5500)
@@ -221,6 +221,7 @@ def orientate(flip):
         time.sleep(.5)
 
 
+#Finds the highest white pixel y value.
 def findHighestY(img):
    white_pixels = np.argwhere(img >= 254)
    highest_y = 0
@@ -230,6 +231,7 @@ def findHighestY(img):
    return highest_y
 
 
+#Method for avoiding white objects
 def avoidWhite():
     global turnFlag
     img = getFrame(2)
@@ -279,7 +281,7 @@ def avoidWhite():
         return 1
 
 
-#function to determine center of gravity
+#function to determine center of gravity of white objects
 def findCoG(img, flag):
     white_pixels = np.argwhere(img >= 254)
     size = len(white_pixels)
@@ -303,6 +305,8 @@ def findCoG(img, flag):
         return -1, -1
     return sumX, sumY
 
+
+#Finds white pixels near the center of the image, returns if found 150
 def findCenterWhitePixels(img):
     white_pixels = np.argwhere(img >= 254)
     count = 0
@@ -316,11 +320,13 @@ def findCenterWhitePixels(img):
         return 0
 
 
+#Method to ignore noise while turning
 def threshold():
     img = getFrame(2)
     white_pixels = np.argwhere(img >= 254)
     size = len(white_pixels)
     rawCapture.truncate(0)
+
     if size < 1700:
         if findCenterWhitePixels(img):
             return 1
@@ -385,7 +391,7 @@ def init_stage():
         if y > 420 and flag:
             time.sleep(.8)
             tango.setTarget(MOTORS, 6000)
-            client.client.sendData("Crossed the Yellow Line")
+            client.client.sendData("Rocky area ahead")
             rawCapture.truncate(0) 
             break
 
@@ -401,7 +407,7 @@ def init_stage():
                 break
 
 
-#Avoid rocks, find and cross blue line
+#Avoid rocks, find and cross pink line
 def stage_one():
     flag = False
     while True:
@@ -416,7 +422,7 @@ def stage_one():
         if y > 420 and flag:
             time.sleep(2)
             tango.setTarget(MOTORS, 6000)
-            client.client.sendData("Crossed the Pink Line")
+            client.client.sendData("Mining area reached")
             rawCapture.truncate(0) 
             break
         
@@ -428,11 +434,12 @@ def stage_one():
             break
         flag = True
 
-#Grab ice
+#Find human and grab ice
 def stage_two():
     findHumanFlag = True
     distFlag = True
     tango.setTarget(HEADTILT, 6300)
+
     while True:
         if findHumanFlag:
             nextSearchPosition()
@@ -503,7 +510,7 @@ def stage_two():
             shutdown()
             break
 
-#Find and cross pink line
+#Find and cross pink line again
 def stage_three():
     headTilt = 4000
     tango.setTarget(HEADTILT, headTilt)
@@ -531,7 +538,7 @@ def stage_three():
         if y > 420 and flag:
             time.sleep(.8)
             tango.setTarget(MOTORS, 6000)
-            client.client.sendData("Crossed the Line")
+            client.client.sendData("Rocky area ahead")
             rawCapture.truncate(0)
             break
 
@@ -547,7 +554,7 @@ def stage_three():
                 break
 
 
-#Navigate through minefield
+#Find and cross yellow line again
 def stage_four():
         while True:
             avoidWhite()
@@ -561,7 +568,7 @@ def stage_four():
             if y > 400:
                 time.sleep(.8)
                 tango.setTarget(MOTORS, 6000)
-                client.client.sendData("Crossed the Line")
+                client.client.sendData("Starting area reached   ")
                 rawCapture.truncate(0)
                 break
             
@@ -572,7 +579,7 @@ def stage_four():
                 shutdown()
                 break
 
-#drop ice in bin
+#Find bin and drop the ice in it
 def final_stage():
     headTilt = 5000
     tango.setTarget(HEADTILT, headTilt)
@@ -640,10 +647,11 @@ def final_stage():
     else:
         tango.setTarget(BODY, 8000)
     time.sleep(.8)
-    client.client.sendData("Dropping. And Done.")
+    client.client.sendData("Dropping. And Done.Goodbye")
     tango.setTarget(HAND, 6000)
 
 
+#Main method for calling stages in order, though, sometimes its nice to go back.
 def main():
     #shutdown()
     print("Init stage")
@@ -670,6 +678,9 @@ def main():
     shutdown()
 
 main()
+
+
+#tester method
 def test():
     while True:
         img = getFrame(3)
