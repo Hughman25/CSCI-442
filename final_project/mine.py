@@ -16,20 +16,14 @@ BODY = 0
 MOTORS = 1
 TURN = 2
 HEADTURN = 3
-<<<<<<< HEAD
-HEADTILT = 4 
-SHOULDER = 6
-HAND = 11
-#set arm motors
-=======
 HEADTILT = 4
 SHOULDER = 6
 HAND = 11
->>>>>>> 5a82da6b5e82f50688074021e373ab2370c8452d
+ELBOW = 8
 
 #Set default motor values
 tango = maestro.Controller()
-body = 6000
+body = 5700
 headTurn = 6000
 headTilt = 6000
 turn = 6000
@@ -39,6 +33,7 @@ maxRightTurn = 5000
 motors = 6000
 shoulder = 6000
 hand = 6000
+elbow = 6000
 
 #Assign values to motors
 tango.setTarget(HEADTURN, headTurn)
@@ -47,18 +42,20 @@ tango.setTarget(TURN, turn)
 tango.setTarget(BODY, body)
 tango.setTarget(SHOULDER, shoulder)
 tango.setTarget(HAND, hand)
+tango.setTarget(ELBOW, elbow)
 #set arm targets
 
+bodyFlag = True
 
 #values for finding orange line with hsv
 lower_yellow_bound = np.array([20, 50, 50], dtype="uint8")
 upper_yellow_bound = np.array([39, 255, 255], dtype="uint8")
-lower_pink_bound = np.array([125, 35, 100], dtype="uint8") #37, 51, 255
+lower_pink_bound = np.array([125, 35, 100], dtype="uint8")
 upper_pink_bound = np.array([180, 125, 125], dtype="uint8")
 lower_white_bound = np.array([0, 0, 240], dtype="uint8")
 upper_white_bound = np.array([255, 15, 255], dtype="uint8")
-lower_green_bound = np.array([50, 50, 50], dtype="uint8")
-upper_green_bound = np.array([70, 255, 255], dtype="uint8")
+lower_green_bound = np.array([45, 50, 50], dtype="uint8")
+upper_green_bound = np.array([75, 255, 255], dtype="uint8")
 
 
 time.sleep(2)
@@ -89,8 +86,26 @@ def getFrame(stage):
     return image
 
 
-def showFrame(image):
+def showFrame(image, flag):
     cv2.imshow("Main Camera", image)
+    if flag:
+        key = cv2.waitKey(1) & 0xFF
+        # if the `q` key was pressed, break from the loop
+        if key == ord("q"):
+            shutdown()
+
+
+def stop():
+    motors = 6000
+    turn = 6000
+    headTilt = 6000
+    tango.setTarget(MOTORS, motors)
+    tango.setTarget(TURN, turn)
+    tango.setTarget(HEADTILT, headTilt)
+    tango.setTarget(BODY, 6000)
+    tango.setTarget(HAND, 6000)
+    tango.setTarget(SHOULDER, 6000)
+    rawCapture.truncate(0)
 
 
 def shutdown():
@@ -104,6 +119,7 @@ def shutdown():
     tango.setTarget(HAND, 6000)
     tango.setTarget(SHOULDER, 6000)
     client.client.killSocket()
+    rawCapture.truncate(0)
     quit()
 
 def centerBody(xabs, yabs, xdist):
@@ -152,15 +168,15 @@ def centerBody(xabs, yabs, xdist):
     tango.setTarget(HEADTURN, 6000)
         
 
-    def centerScreen(xabs, yabs, xdist, ydist):
-        if((xabs > 60) or (yabs > 50)):
-            xdist = xdist + int(xdist*.3)
-            ydist = ydist + int(ydist*.3)
-            tango.setTarget(HEADTURN, 6000 + (xdist*2))
-            tango.setTarget(HEADTILT, 6000 + (int(ydist*2.5)))
-        elif((xabs < 60) and (yabs > 50)):
-            return True
-        return False
+def centerScreen(xabs, yabs, xdist, ydist):
+    if((xabs > 60) or (yabs > 50)):
+        xdist = xdist + int(xdist*.3)
+        ydist = ydist + int(ydist*.3)
+        tango.setTarget(HEADTURN, 6000 + (xdist*2))
+        tango.setTarget(HEADTILT, 6000 + (int(ydist*2.5)))
+    elif((xabs < 60) and (yabs > 50)):
+        return True
+    return False
 
 
 def orientate(flip):
@@ -194,22 +210,25 @@ def findHighestY(img):
 def avoidWhite():
     #avoid rocks
     img = getFrame(2)
-    #showFrame(img)
+    showFrame(img, False)
     high_y = findHighestY(img)
-    x, y = findCoG(img)
+    x, y = findCoG(img, True)
     if high_y >= 410 and 380 > x > 260:
         print("backwards")
+        tango.setTarget(MOTORS, 6000)
+        time.sleep(0.1)
         tango.setTarget(MOTORS, 6800)
         time.sleep(0.4)
-    if 315 > x > 180:
+        tango.setTarget(MOTORS, 6000)
+    if 315 > x > 200:
         print("right turn")
         tango.setTarget(TURN, 5200)
-        time.sleep(.75)
+        time.sleep(.85)
         tango.setTarget(TURN, 6000)
-    elif 490 > x > 325:
+    elif 470 > x > 325:
         print("left turn")
         tango.setTarget(TURN, 6800)
-        time.sleep(.75)
+        time.sleep(.85)
         tango.setTarget(TURN, 6000)
     rawCapture.truncate(0)
     key = cv2.waitKey(1) & 0xFF
@@ -220,17 +239,22 @@ def avoidWhite():
 
 
 #function to determine center of gravity
-def findCoG(img):
+def findCoG(img, flag):
     white_pixels = np.argwhere(img >= 254)
     size = len(white_pixels)
     sumX = 0
     sumY = 0
-    if(size < 200):
+    if size < 100:
         return -1, -1
     for y, x in white_pixels:
-        if y > 100:
+        if flag:
+            if y > 135:
+                sumX += x
+                sumY += y
+        else:
             sumX += x
             sumY += y
+
     if(size > 0):
         sumX = sumX / size
         sumY = sumY / size
@@ -245,7 +269,7 @@ def findCenterWhitePixels(img):
         if y > 180:
             if 350 > x > 290:
                 count += 1
-    if count > 50:
+    if count > 150:
         return 1
     else:
         return 0
@@ -255,16 +279,13 @@ def threshold():
     img = getFrame(2)
     white_pixels = np.argwhere(img >= 254)
     size = len(white_pixels)
-    print(size)
     rawCapture.truncate(0)
     if size < 1700:
         if findCenterWhitePixels(img):
+            return 1
         return 0
     else:
-
-def findIce():
-
-    pass
+        return 1
 
 
 #Find yellow line and cross it
@@ -275,22 +296,32 @@ def init_stage():
     flag = False
 
     while True:
+        if not flag:
+            tango.setTarget(TURN, 7000)
         img = getFrame(0)
-        showFrame(img)
-        x, y = findCoG(img)
+        showFrame(img, False)
+        y = findHighestY(img)
+        x, yx = findCoG(img, True)
 
-        if 300 <= x <= 380:
+        if 260 <= x <= 420:
             print("Forward ini")
             #go forward toward the line
+            if not flag:
+                tango.setTarget(TURN, 6000)
+                tango.setTarget(TURN, 5100)
+                time.sleep(0.35)
+            
             tango.setTarget(TURN, 6000)
             tango.setTarget(MOTORS, 5200)
             flag = True
-
-        if y > 400 and flag:
+        else:
+            flag  = False
+   
+        if y > 420 and flag:
             time.sleep(.8)
             tango.setTarget(MOTORS, 6000)
-            client.client.sendData("Crossed the Line")
-            rawCapture.truncate(0)
+            client.client.sendData("Crossed the Yellow Line")
+            rawCapture.truncate(0) 
             break
 
         rawCapture.truncate(0)
@@ -305,35 +336,42 @@ def init_stage():
                 break
 
 
-    #Avoid rocks, find and cross blue line
-    def stage_one():
-        while True:
-            avoidWhite()
-            tango.setTarget(MOTORS, 5400)
+#Avoid rocks, find and cross blue line
+def stage_one():
+    flag = False
+    while True:
+        avoidWhite()
+        
+        tango.setTarget(MOTORS, 5200)
 
-            #Find PINK line
-            img = getFrame(1)
-            x, y = findCoG(img)
-            if y > 400:
-                time.sleep(1)
-                tango.setTarget(MOTORS, 6000)
-                client.client.sendData("Crossed the Line")
-                rawCapture.truncate(0)
-                break
-            
-            rawCapture.truncate(0)
-            key = cv2.waitKey(1) & 0xFF
-            # if the `q` key was pressed, break from the loop
-            if key == ord("q"):
-                shutdown()
-                break
+        #Find PINK line
+        img = getFrame(1)
+        y = findHighestY(img)
+        x, yx = findCoG(img, True)
+        if y > 420 and flag:
+            time.sleep(2)
+            tango.setTarget(MOTORS, 6000)
+            client.client.sendData("Crossed the Pink Line")
+            rawCapture.truncate(0) 
+            break
+        
+        rawCapture.truncate(0)
+        key = cv2.waitKey(1) & 0xFF
+        # if the `q` key was pressed, break from the loop
+        if key == ord("q"):
+            shutdown()
+            break
+        flag = True
 
 #Grab ice
 def stage_two():
+    findHumanFlag = True
+    distFlag = True
+    tango.setTarget(HEADTILT, 6300)
     #set some stuff like tilt
     while True:
         img = getFrame(-1)
-        #showFrame(img)
+        showFrame(img, True)
         face_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_frontalface_default.xml')
         faces = face_cascade.detectMultiScale(img, 1.3, 4)
         if(len(faces) != 0):
@@ -341,7 +379,6 @@ def stage_two():
                         client.client.sendData("Oh, Hello")
                         findHumanFlag = False
                 x,y,w,h = faces[0]
-                cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,0),2)
                 xcenter = x + int((w/2))
                 ycenter = y + int((h/2))
                 xdist = 320 - xcenter
@@ -368,7 +405,6 @@ def stage_two():
                             motors = 6000
                             tango.setTarget(MOTORS, motors)
                             client.client.sendData("Give me ice prease")
-                            rawCapture.truncate(0)
                             break
 
         rawCapture.truncate(0)
@@ -377,38 +413,24 @@ def stage_two():
         if key == ord("q"):
             shutdown()
             break
-
+    rawCapture.truncate(0)
     #Grab ice with arm
     init_flag = True
     while True:
         #maybe look right/down a bit
         img = getFrame(3)
+        showFrame(img, False)
         if(init_flag):
+            tango.setTarget(ELBOW, 7000)
             tango.setTarget(SHOULDER, 7000)
-        x, y = findCoG(img)
+        x, y = findCoG(img, True)
         if x != -1 and y != -1:
-            time.sleep(1.5)
+            time.sleep(1.8)
             tango.setTarget(HAND, 10000)
-            tango.setTarget(SHOULDER, 6000)
+            rawCapture.truncate(0)
             break
         
-        '''
-        shoulder = 6500
-        hand = 4000
-        headTitlt = 4000
-        headTurn = 4000
-        tango.setTarget(SHOULDER, shoulder)
-        tango.setTarget(HAND, hand)
-        tango.setTarget(HEADTILT, headTilt)
-        tango.setTarget(HEADTURN, headTurn)
-        findIce()
-        hand = 6000
-        headTurn = 6000
-        tango.setTarget(HAND, hand)
-        tango.setTarget(HEADTURN, headTurn)
-
-
-        '''
+        rawCapture.truncate(0)
         key = cv2.waitKey(1) & 0xFF
         # if the `q` key was pressed, break from the loop
         if key == ord("q"):
@@ -420,22 +442,26 @@ def stage_three():
     headTilt = 4500
     headTilt = 4000
     tango.setTarget(HEADTILT, headTilt)
-    tango.setTarget(TURN, 7000)
     flag = False
 
     while True:
+        if not flag:
+            tango.setTarget(TURN, 7000)
         img = getFrame(1)
-        showFrame(img)
-        x, y = findCoG(img)
+        showFrame(img, False)
+        y = findHighestY(img)
+        x, yx = findCoG(img, True)
 
-        if 300 <= x <= 380:
+        if 280 <= x <= 380:
             print("Forward ini")
             #go forward toward the line
             tango.setTarget(TURN, 6000)
             tango.setTarget(MOTORS, 5200)
             flag = True
+        else:
+            flag = False
 
-        if y > 400 and flag:
+        if y > 420 and flag:
             time.sleep(.8)
             tango.setTarget(MOTORS, 6000)
             client.client.sendData("Crossed the Line")
@@ -458,11 +484,12 @@ def stage_three():
 def stage_four():
         while True:
             avoidWhite()
-            tango.setTarget(MOTORS, 5400)
+            tango.setTarget(MOTORS, 5200)
 
             #Find yellow line
             img = getFrame(0)
-            x, y = findCoG(img)
+            y = findHighestY(img)
+            x, yx = findCoG(img, True)
 
             if y > 400:
                 time.sleep(.8)
@@ -480,20 +507,26 @@ def stage_four():
 
 #drop ice in bin
 def final_stage():
-    headTilt = 4000
+    headTilt = 5000
     tango.setTarget(HEADTILT, headTilt)
-    tango.setTarget(TURN, 7000)
+    #tango.setTarget(TURN, 7000)
     flag = False
+    orientate_flag = -1
     size = 0
 
     while True:
         img = getFrame(3)
-        showFrame(3)
-        x, y = findCoG(img)
+        showFrame(img, False)
+        x, y = findCoG(img, False)
+        # if x < 320:
+        #     orientate_flag = 1
+        # elif x > 320:
+        #     orientate_flag = 0
+
 
         if 300 <= x <= 380:
-            print("Found bin")
-            client.client.sendData("Found the Bin")
+            if not flag:
+                client.client.sendData("Found the Bin")
             #go forward toward the bin
             tango.setTarget(TURN, 6000)
             tango.setTarget(MOTORS, 5200)
@@ -501,23 +534,15 @@ def final_stage():
 
         #Uses area and center of gravity to compute proper orientation
         if flag:
-            ret,thresh = cv2.threshold(gray,127,255,1)
-            contours,h = cv2.findContours(thresh,1,2)
-            for contour in contours:
-                sides = cv2.approxPolyDP(contour,0.01*cv2.arcLength(contour,True),True)
-                if sides == 4:
-                    area = cv2.countourArea(contour)
-                    if area > size:
-                        size = area
-            if area > 8000:
-                if x > 320:
-                    orientate(False)
-                elif x < 320:
-                    orientate(True)
+            if x == -1 and y == -1:
+                # if orientate_flag:
+                #     orientate(False)
+                # elif not orientate_flag:
+                #     orientate(True)
                 time.sleep(.5)
-                tango.setTarget(MOTORS, 6000)
-            rawCapture.truncate(0)
-            break
+                stop()
+                rawCapture.truncate(0)
+                break
 
 
         rawCapture.truncate(0)
@@ -529,12 +554,14 @@ def final_stage():
 
     #Dropping ice in Bin
     tango.setTarget(SHOULDER, 7000)
-    tango.setTarget(BODY, 6600)
+    tango.setTarget(BODY, 8000)
+    time.sleep(.8)
     client.client.sendData("Dropping. And Done.")
     tango.setTarget(HAND, 6000)
 
 
 def main():
+    #shutdown()
     print("Init stage")
     init_stage()
 
@@ -545,7 +572,7 @@ def main():
     stage_two()
 
     print("Obtaining Ice")
-    get_ice()
+
 
     print("Stage 3")
     stage_three()
@@ -555,23 +582,23 @@ def main():
 
     print("Final Stage")
     final_stage()
-
+  
     shutdown()
 
 main()
 def test():
-    shoulder = 8000
-    hand = 6000
-    headTitlt = 4000
-    headTurn = 4000
-    tango.setTarget(SHOULDER, shoulder)
-    tango.setTarget(HAND, hand)
-    tango.setTarget(HEADTILT, headTilt)
-    tango.setTarget(HEADTURN, headTurn)
-    findIce()
-    hand = 10000
-    headTurn = 6000
-    tango.setTarget(HAND, hand)
-    tango.setTarget(HEADTURN, headTurn)
+    while True:
+        img = getFrame(3)
+        showFrame(img)
+        
+        rawCapture.truncate(0)
+        key = cv2.waitKey(1) & 0xFF
+        # if the `q` key was pressed, break from the loop 
+        if key == ord("q"):
+            shutdown()
+            break
 
-#test()
+# test()
+# final_stage()
+#shutdown()
+
