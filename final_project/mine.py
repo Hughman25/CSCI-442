@@ -35,7 +35,7 @@ shoulder = 6000
 hand = 6000
 elbow = 6000
 
-#Assign values to motors
+#Assign initial values to motors
 tango.setTarget(HEADTURN, headTurn)
 tango.setTarget(HEADTILT, headTilt)
 tango.setTarget(TURN, turn)
@@ -46,6 +46,7 @@ tango.setTarget(ELBOW, elbow)
 #set arm targets
 
 bodyFlag = True
+turnFlag = -1
 
 #values for finding orange line with hsv
 lower_yellow_bound = np.array([20, 50, 50], dtype="uint8")
@@ -62,26 +63,32 @@ time.sleep(2)
 def getFrame(stage):
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         image = frame.array
+        #image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21) #change 21 lower to increase performance, should be odd
+                                                                        #change 1st 10 change strength of noise removal, may add after blur.
         if stage == 0:
             blur = cv2.GaussianBlur(image, (5, 5), 1)
+            #image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21)
             hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
             mask = cv2.inRange(hsv, lower_yellow_bound, upper_yellow_bound)
-            image = cv2.Canny(mask, 100, 50)
+            #image = cv2.Canny(mask, 100, 50)
         elif stage == 1:
             blur = cv2.GaussianBlur(image, (5, 5), 1)
+            #image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21)
             hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
             mask = cv2.inRange(hsv, lower_pink_bound, upper_pink_bound)
-            image = cv2.Canny(mask, 100, 50)
+            #image = cv2.Canny(mask, 100, 50)
         elif stage == 2:
             blur = cv2.GaussianBlur(image, (5, 5), 1)
+            #image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21)
             hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
             mask = cv2.inRange(hsv, lower_white_bound, upper_white_bound)
-            image = cv2.Canny(mask, 100, 50)
+            #image = cv2.Canny(mask, 100, 50)
         elif stage == 3:
             blur = cv2.GaussianBlur(image, (5, 5), 1)
+            #image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21)
             hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
             mask = cv2.inRange(hsv, lower_green_bound, upper_green_bound)
-            image = cv2.Canny(mask, 100, 50)
+            #image = cv2.Canny(mask, 100, 50)
         break
     return image
 
@@ -121,6 +128,22 @@ def shutdown():
     client.client.killSocket()
     rawCapture.truncate(0)
     quit()
+
+
+def nextSearchPosition():
+        positions = [(6000, 6000, 6000), (6000, 7000, 6500), (6800, 7000, 6500), (6000, 7000, 6500), (5200, 7000, 6500), (6000, 6000, 6000),
+                        (5200, 5000, 5500), (6000, 5000, 5500), (6800, 5000, 5500)] #tilt, turn, bodyturn
+        global headTilt, headTurn, i
+        headTilt = positions[i][0]
+        headTurn = positions[i][1]
+        tango.setTarget(HEADTURN, headTurn)
+        tango.setTarget(HEADTILT, headTilt)
+        tango.setTarget(BODY, positions[i][2])
+        time.sleep(1)
+        i = i + 1
+        if(i == 9):
+                i = 0
+
 
 def centerBody(xabs, yabs, xdist):
     global body, motors, turn, bodyFlag, headTilt, headTurn
@@ -208,11 +231,12 @@ def findHighestY(img):
 
 
 def avoidWhite():
-    #avoid rocks
+    global turnFlag
     img = getFrame(2)
     showFrame(img, False)
     high_y = findHighestY(img)
     x, y = findCoG(img, True)
+
     if high_y >= 410 and 380 > x > 260:
         print("backwards")
         tango.setTarget(MOTORS, 6000)
@@ -220,12 +244,29 @@ def avoidWhite():
         tango.setTarget(MOTORS, 6800)
         time.sleep(0.4)
         tango.setTarget(MOTORS, 6000)
+
+    if turnFlag == 1:
+        tango.setTarget(TURN, 6800)
+        time.sleep(.85)
+        tango.setTarget(TURN, 6000)
+        turnFlag = -1
+        rawCapture.truncate(0)
+        return 1
+    elif turnFlag == 0:
+        tango.setTarget(TURN, 5200)
+        time.sleep(.85)
+        tango.setTarget(TURN, 6000)
+        rawCapture.truncate(0)
+        return 1
+
     if 315 > x > 200:
+        turnFlag = 1
         print("right turn")
         tango.setTarget(TURN, 5200)
         time.sleep(.85)
         tango.setTarget(TURN, 6000)
     elif 470 > x > 325:
+        turnFlag = 0
         print("left turn")
         tango.setTarget(TURN, 6800)
         time.sleep(.85)
@@ -244,11 +285,11 @@ def findCoG(img, flag):
     size = len(white_pixels)
     sumX = 0
     sumY = 0
-    if size < 100:
+    if size < 125:
         return -1, -1
     for y, x in white_pixels:
         if flag:
-            if y > 135:
+            if y > 125:
                 sumX += x
                 sumY += y
         else:
@@ -302,7 +343,31 @@ def init_stage():
         showFrame(img, False)
         y = findHighestY(img)
         x, yx = findCoG(img, True)
-
+        
+        #can shorten this dist and make it turn if outside
+        '''
+        if 300 <= x <= 340:
+            print("Forward ini")
+            #go forward toward the line
+            if not flag:
+                tango.setTarget(TURN, 6000)
+                tango.setTarget(TURN, 5100)
+                time.sleep(0.35)
+            
+            tango.setTarget(TURN, 6000)
+            tango.setTarget(MOTORS, 5200)
+            flag = True
+        elif x < 300:
+            tango.setTarget(TURN, 5200)
+            time.sleep(1)
+            tango.setTarget(TURN, 6000)
+        elif x > 340:
+            tango.setTarget(TURN, 6800)
+            time.sleep(1)
+            tango.setTarget(TURN, 6000)
+        else:
+            flag  = False
+        '''
         if 260 <= x <= 420:
             print("Forward ini")
             #go forward toward the line
@@ -368,8 +433,9 @@ def stage_two():
     findHumanFlag = True
     distFlag = True
     tango.setTarget(HEADTILT, 6300)
-    #set some stuff like tilt
     while True:
+        if findHumanFlag:
+            nextSearchPosition()
         img = getFrame(-1)
         showFrame(img, True)
         face_cascade = cv2.CascadeClassifier('data/haarcascades/haarcascade_frontalface_default.xml')
@@ -439,9 +505,10 @@ def stage_two():
 
 #Find and cross pink line
 def stage_three():
-    headTilt = 4500
     headTilt = 4000
     tango.setTarget(HEADTILT, headTilt)
+    tango.setTarget(TURN, 7000)
+    time.sleep(1)
     flag = False
 
     while True:
@@ -509,28 +576,42 @@ def stage_four():
 def final_stage():
     headTilt = 5000
     tango.setTarget(HEADTILT, headTilt)
-    #tango.setTarget(TURN, 7000)
     flag = False
     orientate_flag = -1
-    size = 0
+    right_hand_side = False
 
     while True:
+        if not flag:
+            tango.setTarget(TURN, 7000)
         img = getFrame(3)
         showFrame(img, False)
         x, y = findCoG(img, False)
-        # if x < 320:
+        if x == -1 and y == -1:
+            flag = False
+        # if x < 320: #turn left
         #     orientate_flag = 1
-        # elif x > 320:
+        # elif x > 320: #turn right
         #     orientate_flag = 0
 
 
-        if 300 <= x <= 380:
+        if 290 <= x <= 350:
             if not flag:
                 client.client.sendData("Found the Bin")
             #go forward toward the bin
             tango.setTarget(TURN, 6000)
             tango.setTarget(MOTORS, 5200)
             flag = True
+        elif x < 300:
+            tango.setTarget(TURN, 5200)
+            time.sleep(1)
+            tango.setTarget(TURN, 6000)
+        elif x > 380:
+            tango.setTarget(TURN, 6800)
+            time.sleep(1)
+            tango.setTarget(TURN, 6000)
+            right_hand_side = True
+        else:
+            flag = False
 
         #Uses area and center of gravity to compute proper orientation
         if flag:
@@ -554,7 +635,10 @@ def final_stage():
 
     #Dropping ice in Bin
     tango.setTarget(SHOULDER, 7000)
-    tango.setTarget(BODY, 8000)
+    if right_hand_side:
+        tango.setTarget(BODY, 9500)
+    else:
+        tango.setTarget(BODY, 8000)
     time.sleep(.8)
     client.client.sendData("Dropping. And Done.")
     tango.setTarget(HAND, 6000)
@@ -600,5 +684,4 @@ def test():
 
 # test()
 # final_stage()
-#shutdown()
-
+# shutdown()
