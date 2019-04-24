@@ -17,9 +17,9 @@ MOTORS = 1
 TURN = 2
 HEADTURN = 3
 HEADTILT = 4
-SHOULDER = 9
-HAND = 6
-ELBOW = 7
+SHOULDER = 7
+HAND = 11
+ELBOW = 8
 
 #Set default motor values
 tango = maestro.Controller()
@@ -37,10 +37,10 @@ body = 5700
 headTurn = 6000
 headTilt = 6000
 turn = 6000
-maxMotor = 5675
+maxMotor = 6800
 maxLeftTurn = 7000
 maxRightTurn = 5000
-motors = 5550
+motors = 5200
 shoulder = 6000
 hand = 6000
 elbow = 6000
@@ -52,9 +52,9 @@ i = 0
 
 #values for finding orange line with hsv
 lower_yellow_bound = np.array([20, 50, 50], dtype="uint8")
-upper_yellow_bound = np.array([39, 255, 255], dtype="uint8")
-lower_pink_bound = np.array([155, 15, 190], dtype="uint8")
-upper_pink_bound = np.array([175, 120, 255], dtype="uint8")
+upper_yellow_bound = np.array([39, 250, 255], dtype="uint8")
+lower_pink_bound = np.array([150, 10, 180], dtype="uint8") #155, 15, 185
+upper_pink_bound = np.array([170, 125, 255], dtype="uint8") #175, 120, 255
 lower_white_bound = np.array([0, 0, 235], dtype="uint8")
 upper_white_bound = np.array([255, 15, 255], dtype="uint8")
 lower_green_bound = np.array([40, 50, 50], dtype="uint8")
@@ -73,6 +73,8 @@ def getFrame(stage):
             blur = cv2.GaussianBlur(image, (5, 5), 1)
             #image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,1)
             hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
+            #element = cv.getStructuringElement(dilatation_type, (2*dilatation_size + 1, 2*dilatation_size+1), (dilatation_size, dilatation_size))
+            #dilatation_dst = cv.dilate(src, element)
             #image = cv2.Canny(mask, 100, 50) #For safe keeping
 
         if stage == 0:
@@ -208,7 +210,7 @@ def orientate(flip):
     if(flip):
         tango.setTarget(TURN, 5500)
         time.sleep(.3)
-        tango.setTarget(MOTORS, 5600)
+        tango.setTarget(MOTORS, 5800)
         time.sleep(.3)
         tango.setTarget(MOTORS, 6000)
         tango.setTarget(TURN, 6800)
@@ -216,7 +218,7 @@ def orientate(flip):
     elif(not flip):
         tango.setTarget(TURN, 6500)
         time.sleep(.3)
-        tango.setTarget(MOTORS, 5600)
+        tango.setTarget(MOTORS, 5200)
         time.sleep(.3)
         tango.setTarget(MOTORS, 6000)
         tango.setTarget(TURN, 5200)
@@ -243,7 +245,7 @@ def avoidWhite():
     size = len(np.argwhere(img >= 254))
     #print(x, y, high_y)
 
-    if high_y >= 380 and 380 > x > 260:
+    if high_y >= 380 and 380 > x > 260 and y > 240:
         print("backwards")
         if turnFlag == 3:
             tango.setTarget(TURN, 5000)
@@ -253,18 +255,18 @@ def avoidWhite():
             return 1
         #tango.setTarget(MOTORS, 6000)
         #time.sleep(0.1)
-        tango.setTarget(MOTORS, 6600)
+        tango.setTarget(MOTORS, 6800)
         time.sleep(0.4)
         tango.setTarget(MOTORS, 6000)
         turnFlag == 3
 
-    if 290 > x > 120 and y > 150:
+    if 290 > x > 140 and y > 150:
         turnFlag = 1
         print("right turn")
         tango.setTarget(TURN, 5000)
         time.sleep(.85)
         tango.setTarget(TURN, 6000)
-    elif 520 > x > 350 and y > 150:
+    elif 500 > x > 350 and y > 150:
         turnFlag = 0
         print("left turn")
         tango.setTarget(TURN, 7000)
@@ -302,7 +304,7 @@ def findCoG(img, flag):
         return -1, -1
     for y, x in white_pixels:
         if flag:
-            if y > 180:
+            if y > 160:
                 if 590 > x > 50:
                     sumX += x
                     sumY += y
@@ -409,10 +411,10 @@ def init_stage():
             if not flag:
                 tango.setTarget(TURN, 6000)
                 tango.setTarget(TURN, 5000)
-                time.sleep(.43)
+                time.sleep(.4)
             
             tango.setTarget(TURN, 6000)
-            tango.setTarget(MOTORS, 5550)
+            tango.setTarget(MOTORS, 5200)
             flag = True
         else:
             flag  = False
@@ -435,7 +437,7 @@ def stage_one():
     while True:
         avoidWhite()
         
-        tango.setTarget(MOTORS, 5550)
+        tango.setTarget(MOTORS, 5200)
 
         #Find PINK line
         img = getFrame(1)
@@ -443,17 +445,17 @@ def stage_one():
         x, yx = findCoG(img, False)
 
 
-        # if x > 370 and yx > 150:
-        #     tango.setTarget(TURN, 5000)
-        #     time.sleep(1)
-        #     tango.setTarget(TURN, 6000)
-        # elif 0 < x < 270 and yx > 150:
-        #     tango.setTarget(TURN, 7000)
-        #     time.sleep(1)
-        #     tango.setTarget(TURN, 6000)
+        if x > 480 and yx > 160:
+            tango.setTarget(TURN, 5000)
+            time.sleep(1)
+            tango.setTarget(TURN, 6000)
+        elif 0 < x < 160 and yx > 160:
+            tango.setTarget(TURN, 7000)
+            time.sleep(1)
+            tango.setTarget(TURN, 6000)
 
         if y > 420 and flag:
-            time.sleep(2)
+            time.sleep(1)
             tango.setTarget(MOTORS, 6000)
             client.client.sendData("Mining area reached")
             rawCapture.truncate(0) 
@@ -553,7 +555,7 @@ def stage_three():
 
     while True:
         if not flag:
-            tango.setTarget(TURN, 7000)
+            tango.setTarget(TURN, 6900)
         img = getFrame(1)
         showFrame(img, False)
         y = findHighestY(img)
@@ -576,7 +578,7 @@ def stage_three():
                 time.sleep(.43)
             #go forward toward the line
             tango.setTarget(TURN, 6000)
-            tango.setTarget(MOTORS, 5550)
+            tango.setTarget(MOTORS, 5200)
             flag = True
         else:
             flag = False
@@ -597,7 +599,7 @@ def stage_three():
 def stage_four():
     while True:
         avoidWhite()
-        tango.setTarget(MOTORS, 5550)
+        tango.setTarget(MOTORS, 5200)
 
         #Find yellow line
         img = getFrame(0)
@@ -646,7 +648,7 @@ def final_stage():
                 client.client.sendData("Found the Bin")
             #go forward toward the bin
             tango.setTarget(TURN, 6000)
-            tango.setTarget(MOTORS, 5550)
+            tango.setTarget(MOTORS, 5200)
             flag = True
         elif x < 300:
             tango.setTarget(TURN, 5400)
@@ -721,7 +723,7 @@ main()
 def test():
     tango.setTarget(HEADTILT, 4000)
     while True:
-        img = getFrame(0)
+        img = getFrame(1)
         showFrame(img, False)
         rawCapture.truncate(0)
         threshold()
