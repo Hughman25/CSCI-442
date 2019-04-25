@@ -31,15 +31,15 @@ tango.setTarget(TURN, 6000)
 tango.setTarget(BODY, 5700)
 tango.setTarget(SHOULDER, 6000)
 tango.setTarget(HAND, 6000)
-tango.setTarget(ELBOW, 6000)
+#tango.setTarget(ELBOW, 6000)
 
 body = 5700
 headTurn = 6000
 headTilt = 6000
 turn = 6000
 maxMotor = 6800
-maxLeftTurn = 7000
-maxRightTurn = 5000
+maxLeftTurn = 6800
+maxRightTurn = 5200
 motors = 5200
 shoulder = 6000
 hand = 6000
@@ -243,45 +243,47 @@ def avoidWhite():
     high_y = findHighestY(img)
     x, y = findCoG(img, True)
     size = len(np.argwhere(img >= 254))
-    #print(x, y, high_y)
+    print(x, y, high_y)
 
-    if high_y >= 380 and 380 > x > 260 and y > 240:
+    if high_y >= 360 and 420 > x > 220:
         print("backwards")
         if turnFlag == 3:
-            tango.setTarget(TURN, 5000)
-            time.sleep(.85)
+            tango.setTarget(TURN, 5200)
+            time.sleep(1.5)
             tango.setTarget(TURN, 6000)
             turnFlag == 4
             return 1
         #tango.setTarget(MOTORS, 6000)
         #time.sleep(0.1)
         tango.setTarget(MOTORS, 6800)
-        time.sleep(0.4)
+        time.sleep(0.8)
         tango.setTarget(MOTORS, 6000)
         turnFlag == 3
 
-    if 290 > x > 140 and y > 150:
+    if 290 > x > 120 and y > 150:
         turnFlag = 1
         print("right turn")
-        tango.setTarget(TURN, 5000)
+        tango.setTarget(TURN, 5200)
         time.sleep(.85)
         tango.setTarget(TURN, 6000)
-    elif 500 > x > 350 and y > 150:
+    elif 520 > x > 350 and y > 150:
         turnFlag = 0
         print("left turn")
-        tango.setTarget(TURN, 7000)
+        tango.setTarget(TURN, 6800)
         time.sleep(.85)
         tango.setTarget(TURN, 6000)
     #print("size", size)
     # < 18000
-    if y <= 50 or size < 9500:
+    if y <= 60 or size < 9500:
         if turnFlag == 1:
-            tango.setTarget(TURN, 7000)
+            time.sleep(1.5)
+            tango.setTarget(TURN, 6800)
             time.sleep(.85)
             tango.setTarget(TURN, 6000)
             turnFlag = -1
         elif turnFlag == 0:
-            tango.setTarget(TURN, 5000)
+            time.sleep(1.5)
+            tango.setTarget(TURN, 5200)
             time.sleep(.85)
             tango.setTarget(TURN, 6000)
             turnFlag = -1
@@ -399,7 +401,7 @@ def init_stage():
         '''
         
         if y > 420 and flag:
-            time.sleep(.8)
+            time.sleep(.93)
             tango.setTarget(MOTORS, 6000)
             client.client.sendData("Rocky area ahead")
             rawCapture.truncate(0) 
@@ -410,7 +412,7 @@ def init_stage():
             #go forward toward the line
             if not flag:
                 tango.setTarget(TURN, 6000)
-                tango.setTarget(TURN, 5000)
+                tango.setTarget(TURN, 5200)
                 time.sleep(.4)
             
             tango.setTarget(TURN, 6000)
@@ -446,16 +448,17 @@ def stage_one():
 
 
         if x > 480 and yx > 160:
-            tango.setTarget(TURN, 5000)
+            tango.setTarget(TURN, 5200)
             time.sleep(1)
             tango.setTarget(TURN, 6000)
         elif 0 < x < 160 and yx > 160:
-            tango.setTarget(TURN, 7000)
+            tango.setTarget(TURN, 6800)
             time.sleep(1)
             tango.setTarget(TURN, 6000)
 
-        if y > 420 and flag:
-            time.sleep(1)
+        if y > 420 and flag and yx > 240:
+            tango.setTarget(MOTORS, 5200)
+            time.sleep(1.5)
             tango.setTarget(MOTORS, 6000)
             client.client.sendData("Mining area reached")
             rawCapture.truncate(0) 
@@ -484,7 +487,7 @@ def stage_two():
         faces = face_cascade.detectMultiScale(img, 1.3, 4)
         if(len(faces) != 0):
                 if(findHumanFlag):
-                        client.client.sendData("Oh, Hello")
+                        client.client.sendData("Howdy Human")
                         findHumanFlag = False
                 x,y,w,h = faces[0]
                 xcenter = x + int((w/2))
@@ -500,7 +503,7 @@ def stage_two():
                     if(distFlag):
                         if(w*h < 19000 or w*h > 24000):
                             if(w*h < 19000): #move forwwards
-                                temp = (19000-w*h) / 5600
+                                temp = (19000-w*h) / 5400
                                 motors = 5550
                                 tango.setTarget(MOTORS, motors)
                                 time.sleep(temp)
@@ -512,7 +515,7 @@ def stage_two():
                             distFlag = False
                             motors = 6000
                             tango.setTarget(MOTORS, motors)
-                            client.client.sendData("Give me ice prease")
+                            client.client.sendData("Give me ice")
                             break
 
         rawCapture.truncate(0)
@@ -530,7 +533,7 @@ def stage_two():
         showFrame(img, False)
         if(init_flag):
             tango.setTarget(ELBOW, 7000)
-            tango.setTarget(SHOULDER, 7000)
+            tango.setTarget(SHOULDER, 7200)
         x, y = findCoG(img, False)
         if x != -1 and y != -1:
             time.sleep(1.8)
@@ -549,22 +552,20 @@ def stage_two():
 def stage_three():
     headTilt = 4000
     tango.setTarget(HEADTILT, headTilt)
-    tango.setTarget(TURN, 7000)
+    tango.setTarget(TURN, maxLeftTurn)
     time.sleep(.1)
     flag = False
 
     while True:
         if not flag:
-            tango.setTarget(TURN, 6900)
+            tango.setTarget(TURN, maxLeftTurn)
         img = getFrame(1)
         showFrame(img, False)
         y = findHighestY(img)
         x, yx = findCoG(img, False)
 
-        print("Stage 3:", x, yx)
-
         if y > 420 and flag:
-            time.sleep(.8)
+            time.sleep(1)
             tango.setTarget(MOTORS, 6000)
             client.client.sendData("Rocky area ahead")
             rawCapture.truncate(0)
@@ -574,7 +575,7 @@ def stage_three():
             print("Forward ini")
             if not flag:
                 tango.setTarget(TURN, 6000)
-                tango.setTarget(TURN, 5000)
+                tango.setTarget(TURN, 5200)
                 time.sleep(.43)
             #go forward toward the line
             tango.setTarget(TURN, 6000)
@@ -608,7 +609,7 @@ def stage_four():
         x, yx = findCoG(img, False)
 
         if y > 400:
-            time.sleep(.8)
+            time.sleep(1.3)
             tango.setTarget(MOTORS, 6000)
             client.client.sendData("Starting area reached")
             rawCapture.truncate(0)
@@ -623,46 +624,22 @@ def stage_four():
 
 #Find bin and drop the ice in it
 def final_stage():
-    headTilt = 5000
+    headTilt = 4000
     tango.setTarget(HEADTILT, headTilt)
     flag = False
+    time_flag = True
     orientate_flag = -1
     right_hand_side = False
+    timer = 0
 
     while True:
-        if not flag:
-            tango.setTarget(TURN, 7000)
         img = getFrame(3)
         showFrame(img, False)
         x, y = findCoG(img, False)
-        if x == -1 and y == -1:
-            flag = False
-        # if x < 320: #turn left
-        #     orientate_flag = 1
-        # elif x > 320: #turn right
-        #     orientate_flag = 0
 
+        print("Final Stage:", x, y)
 
-        if 290 <= x <= 350:
-            if not flag:
-                client.client.sendData("Found the Bin")
-            #go forward toward the bin
-            tango.setTarget(TURN, 6000)
-            tango.setTarget(MOTORS, 5200)
-            flag = True
-        elif x < 300:
-            tango.setTarget(TURN, 5400)
-            time.sleep(1)
-            tango.setTarget(TURN, 6000)
-        elif x > 380:
-            tango.setTarget(TURN, 6600)
-            time.sleep(1)
-            tango.setTarget(TURN, 6000)
-            right_hand_side = True
-        else:
-            flag = False
-
-        #Uses area and center of gravity to compute proper orientation
+        #Uses center of gravity to compute proper orientation
         if flag:
             if x == -1 and y == -1:
                 # if orientate_flag:
@@ -674,6 +651,39 @@ def final_stage():
                 rawCapture.truncate(0)
                 break
 
+        if x == -1 and y == -1:
+            if time_flag:
+                timer = time.time()
+                time_flag = False
+            elasped_time = time.time() - timer
+            if elasped_time > 3:
+                flag = False
+                time_flag = True
+
+        if 290 <= x <= 350:
+            if not flag:
+                client.client.sendData("Found the Bin")
+            #go forward toward the bin
+            tango.setTarget(TURN, 6000)
+            tango.setTarget(MOTORS, 5200)
+            flag = True
+
+        elif 0 < x < 300:
+            print("LEFT")
+            tango.setTarget(TURN, 7000)
+            time.sleep(.75)
+            tango.setTarget(TURN, 6000)
+            right_hand_side = True
+            # print("Howdy")
+        elif x > 380:
+            print("RIGHT")
+            tango.setTarget(TURN, 5000)
+            time.sleep(.75)
+            tango.setTarget(TURN, 6000)
+            # right_hand_side = True
+                
+        if not flag:
+            tango.setTarget(TURN, 6900)
 
         rawCapture.truncate(0)
         key = cv2.waitKey(1) & 0xFF
@@ -683,7 +693,7 @@ def final_stage():
             break
 
     #Dropping ice in Bin
-    tango.setTarget(SHOULDER, 7000)
+    tango.setTarget(SHOULDER, 7200)
     if right_hand_side:
         tango.setTarget(BODY, 9500)
     else:
@@ -716,23 +726,14 @@ def main():
   
     shutdown()
 
-main()
+# main()
 
 
 #tester method
 def test():
-    tango.setTarget(HEADTILT, 4000)
-    while True:
-        img = getFrame(1)
-        showFrame(img, False)
-        rawCapture.truncate(0)
-        threshold()
-        key = cv2.waitKey(1) & 0xFF
-        # if the `q` key was pressed, break from the loop 
-        if key == ord("q"):
-            shutdown()
-            break
+    final_stage()
+    shutdown()
 
 # test()
-# final_stage()
-# shutdown()
+final_stage()
+shutdown()
