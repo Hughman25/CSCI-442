@@ -205,26 +205,6 @@ def centerScreen(xabs, yabs, xdist, ydist):
     return False
 
 
-#Orientates the robot if it is not properly positioned for the bin
-def orientate(flip):
-    if(flip):
-        tango.setTarget(TURN, 5500)
-        time.sleep(.3)
-        tango.setTarget(MOTORS, 5800)
-        time.sleep(.3)
-        tango.setTarget(MOTORS, 6000)
-        tango.setTarget(TURN, 6800)
-        time.sleep(.5)
-    elif(not flip):
-        tango.setTarget(TURN, 6500)
-        time.sleep(.3)
-        tango.setTarget(MOTORS, 5200)
-        time.sleep(.3)
-        tango.setTarget(MOTORS, 6000)
-        tango.setTarget(TURN, 5200)
-        time.sleep(.5)
-
-
 #Finds the highest white pixel y value.
 def findHighestY(img):
    white_pixels = np.argwhere(img >= 254)
@@ -249,7 +229,7 @@ def avoidWhite():
         print("backwards")
         if turnFlag == 3:
             tango.setTarget(TURN, 5000)
-            time.sleep(1.5)
+            time.sleep(1)
             tango.setTarget(TURN, 6000)
             turnFlag == 4
             return 1
@@ -373,33 +353,6 @@ def init_stage():
         y = findHighestY(img)
         x, yx = findCoG(img, False)
         
-        #can shorten this dist and make it turn if outside
-        '''
-        if 300 <= x <= 340:
-            print("Forward ini")
-            #go forward toward the line
-            if not flag:
-                tango.setTarget(TURN, 6000)
-                tango.setTarget(TURN, 5100)
-                time.sleep(0.35)
-            
-            tango.setTarget(TURN, 6000)
-            tango.setTarget(MOTORS, 5200)
-            flag = True
-        elif 0 < x < 300:
-            print("first")
-            tango.setTarget(TURN, 5200)
-            time.sleep(2.5)
-            tango.setTarget(TURN, 6000)
-        elif x > 340:
-            print("second")
-            tango.setTarget(TURN, 6800)
-            time.sleep(2.5)
-            tango.setTarget(TURN, 6000)
-        else:
-            flag  = False
-        '''
-        
         if y > 420 and flag:
             time.sleep(.93)
             tango.setTarget(MOTORS, 6000)
@@ -450,6 +403,8 @@ def stage_one():
 
         if(270 <= x <= 370):
             flag = True
+        else:
+            flag = False
 
         if x > 480 and yx > 160:
             print("FIRST")
