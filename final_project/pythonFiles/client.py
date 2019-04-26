@@ -10,7 +10,7 @@ class ClientSocket(threading.Thread):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.connect((IP, PORT))
   
-        print ('connected')
+        # print ('connected')
         self.alive = threading.Event()
         self.alive.set()
 
@@ -25,10 +25,10 @@ class ClientSocket(threading.Thread):
                 pass
 
     def sendData(self, sendingString):
-        print ('sending')
+        # print ('sending')
         sendingString += "\n"
         self.s.send(sendingString.encode('UTF-8'))
-        print ('done sending')
+        # print ('done sending')
 
     def run(self):
         global globalVar
@@ -44,16 +44,16 @@ class ClientSocket(threading.Thread):
     def killSocket(self):
         self.alive.clear()
         self.s.close()
-        print("Goodbye")
+        # print("Goodbye")
         exit()
             
 
-IP = '10.200.36.62'
-PORT = 2001 
+IP = '10.200.49.123'
+PORT = 5010
 client = ClientSocket(IP, PORT)
 ##client.start()
 
-for i in ["hello human", "How are you", "Sorry, you must die now"]:
-    time.sleep(1)
-    client.sendData(i)            
-print("Exiting Sends")
+# for i in ["hello human", "How are you", "Sorry, you must die now"]:
+#     time.sleep(1)
+#     client.sendData(i)            
+# print("Exiting Sends")

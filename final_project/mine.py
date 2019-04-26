@@ -17,7 +17,7 @@ MOTORS = 1
 TURN = 2
 HEADTURN = 3
 HEADTILT = 4
-SHOULDER = 7
+SHOULDER = 6
 HAND = 11
 ELBOW = 8
 
@@ -28,7 +28,7 @@ tango = maestro.Controller()
 tango.setTarget(HEADTURN, 6000)
 tango.setTarget(HEADTILT, 6000)
 tango.setTarget(TURN, 6000)
-tango.setTarget(BODY, 5700)
+tango.setTarget(BODY, 6000)
 tango.setTarget(SHOULDER, 6000)
 tango.setTarget(HAND, 6000)
 #tango.setTarget(ELBOW, 6000)
@@ -38,7 +38,7 @@ headTurn = 6000
 headTilt = 6000
 turn = 6000
 maxMotor = 6800
-maxLeftTurn = 6800
+maxLeftTurn = 7000
 maxRightTurn = 5200
 motors = 5200
 shoulder = 6000
@@ -245,17 +245,17 @@ def avoidWhite():
     size = len(np.argwhere(img >= 254))
     print(x, y, high_y)
 
-    if high_y >= 360 and 420 > x > 220:
+    if high_y >= 400 and 370 > x > 270 and y > 260:
         print("backwards")
         if turnFlag == 3:
-            tango.setTarget(TURN, 5200)
+            tango.setTarget(TURN, 5000)
             time.sleep(1.5)
             tango.setTarget(TURN, 6000)
             turnFlag == 4
             return 1
         #tango.setTarget(MOTORS, 6000)
         #time.sleep(0.1)
-        tango.setTarget(MOTORS, 6800)
+        tango.setTarget(MOTORS, 7000)
         time.sleep(0.8)
         tango.setTarget(MOTORS, 6000)
         turnFlag == 3
@@ -263,13 +263,13 @@ def avoidWhite():
     if 290 > x > 120 and y > 150:
         turnFlag = 1
         print("right turn")
-        tango.setTarget(TURN, 5200)
+        tango.setTarget(TURN, 5000)
         time.sleep(.85)
         tango.setTarget(TURN, 6000)
     elif 520 > x > 350 and y > 150:
         turnFlag = 0
         print("left turn")
-        tango.setTarget(TURN, 6800)
+        tango.setTarget(TURN, 7000)
         time.sleep(.85)
         tango.setTarget(TURN, 6000)
     #print("size", size)
@@ -277,13 +277,13 @@ def avoidWhite():
     if y <= 60 or size < 9500:
         if turnFlag == 1:
             time.sleep(1.5)
-            tango.setTarget(TURN, 6800)
+            tango.setTarget(TURN, 7000)
             time.sleep(.85)
             tango.setTarget(TURN, 6000)
             turnFlag = -1
         elif turnFlag == 0:
             time.sleep(1.5)
-            tango.setTarget(TURN, 5200)
+            tango.setTarget(TURN, 5000)
             time.sleep(.85)
             tango.setTarget(TURN, 6000)
             turnFlag = -1
@@ -412,11 +412,11 @@ def init_stage():
             #go forward toward the line
             if not flag:
                 tango.setTarget(TURN, 6000)
-                tango.setTarget(TURN, 5200)
+                tango.setTarget(TURN, 5000)
                 time.sleep(.4)
             
             tango.setTarget(TURN, 6000)
-            tango.setTarget(MOTORS, 5200)
+            tango.setTarget(MOTORS, 5000)
             flag = True
         else:
             flag  = False
@@ -439,26 +439,32 @@ def stage_one():
     while True:
         avoidWhite()
         
-        tango.setTarget(MOTORS, 5200)
+        tango.setTarget(MOTORS, 5000)
 
         #Find PINK line
         img = getFrame(1)
         y = findHighestY(img)
         x, yx = findCoG(img, False)
+        print("STAGE ONE:")
+        print(x, yx, y)
 
+        if(270 <= x <= 370):
+            flag = True
 
         if x > 480 and yx > 160:
-            tango.setTarget(TURN, 5200)
+            print("FIRST")
+            tango.setTarget(TURN, 5000)
             time.sleep(1)
             tango.setTarget(TURN, 6000)
         elif 0 < x < 160 and yx > 160:
-            tango.setTarget(TURN, 6800)
+            print("SECOND")
+            tango.setTarget(TURN, 7000)
             time.sleep(1)
             tango.setTarget(TURN, 6000)
 
-        if y > 420 and flag and yx > 240:
-            tango.setTarget(MOTORS, 5200)
-            time.sleep(1.5)
+        if y > 380 and flag:
+            tango.setTarget(MOTORS, 5000)
+            time.sleep(2.3)
             tango.setTarget(MOTORS, 6000)
             client.client.sendData("Mining area reached")
             rawCapture.truncate(0) 
@@ -470,7 +476,6 @@ def stage_one():
         if key == ord("q"):
             shutdown()
             break
-        flag = True
 
 #Find human and grab ice
 def stage_two():
@@ -504,12 +509,12 @@ def stage_two():
                         if(w*h < 19000 or w*h > 24000):
                             if(w*h < 19000): #move forwwards
                                 temp = (19000-w*h) / 5400
-                                motors = 5550
+                                motors = 5500
                                 tango.setTarget(MOTORS, motors)
                                 time.sleep(temp)
                             elif(w*h > 24000): #move backwards
                                 temp = (w*h-24000)/50000
-                                motors = 6450
+                                motors = 6500
                                 tango.setTarget(MOTORS, motors)      
                                 time.sleep(temp)
                             distFlag = False
@@ -575,7 +580,7 @@ def stage_three():
             print("Forward ini")
             if not flag:
                 tango.setTarget(TURN, 6000)
-                tango.setTarget(TURN, 5200)
+                tango.setTarget(TURN, 5000)
                 time.sleep(.43)
             #go forward toward the line
             tango.setTarget(TURN, 6000)
@@ -637,8 +642,6 @@ def final_stage():
         showFrame(img, False)
         x, y = findCoG(img, False)
 
-        print("Final Stage:", x, y)
-
         #Uses center of gravity to compute proper orientation
         if flag:
             if x == -1 and y == -1:
@@ -662,6 +665,7 @@ def final_stage():
 
         if 290 <= x <= 350:
             if not flag:
+                pass
                 client.client.sendData("Found the Bin")
             #go forward toward the bin
             tango.setTarget(TURN, 6000)
@@ -683,7 +687,7 @@ def final_stage():
             # right_hand_side = True
                 
         if not flag:
-            tango.setTarget(TURN, 6900)
+            tango.setTarget(TURN, 7000)
 
         rawCapture.truncate(0)
         key = cv2.waitKey(1) & 0xFF
@@ -726,7 +730,7 @@ def main():
   
     shutdown()
 
-# main()
+main()
 
 
 #tester method
@@ -735,5 +739,5 @@ def test():
     shutdown()
 
 # test()
-final_stage()
-shutdown()
+# final_stage()
+# shutdown()
